@@ -1,0 +1,78 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String         @id @default(cuid())
+  email         String         @unique
+  name          String?
+  password      String
+  role          Role           @default(USER)
+  trialEndsAt   DateTime
+  createdAt     DateTime       @default(now())
+  photos        Photo[]
+  subscriptions Subscription[]
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+model Photo {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  imageData String   @db.Text
+  layout    String   @default("strip")
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([createdAt])
+}
+
+model Subscription {
+  id        String             @id @default(cuid())
+  userId    String
+  user      User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orderId   String             @unique
+  plan      String
+  method    PaymentMethod
+  amount    Int
+  status    SubscriptionStatus @default(PENDING)
+  proofData String?            @db.Text
+  startsAt  DateTime?
+  endsAt    DateTime?
+  createdAt DateTime           @default(now())
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  type      String   // 'proof_submitted' | 'payment_approved' | 'payment_rejected'
+  title     String
+  body      String
+  read      Boolean  @default(false)
+  userId    String   // siapa yang memicu notif ini
+  orderId   String?  // referensi order
+  createdAt DateTime @default(now())
+
+  @@index([read])
+  @@index([createdAt])
+}
+
+enum PaymentMethod {
+  DANA
+  GOPAY
+}
+
+enum SubscriptionStatus {
+  PENDING
+  PAID
+  REJECTED
+  EXPIRED
+}
