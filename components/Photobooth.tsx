@@ -77,13 +77,13 @@ export const LAYOUTS: LayoutDef[] = [
 ]
 
 /* ════════════════════════════════════════════════════════════
-   8 TEMPLATE PERSIS SEPERTI GAMBAR 1 & 2
+   TEMPLATES — 13 TEMPLATE (8 lama + 5 baru dari foto user)
 ════════════════════════════════════════════════════════════ */
 const TEMPLATES: Template[] = [
-  // ── 1. SNOOPY & MIFFY (GAMBAR 1 NO 3) ───────────────────
+  // ── 1. SNOOPY & MIFFY ───────────────────────────────────
   {
     id: 'snoopy-miffy',
-    name: 'snoopy & miffy',
+    name: 'Snoopy & Miffy',
     category: 'Karakter & Kartun',
     tag: 'Free',
     tagColor: 'bg-purple-600 text-white',
@@ -103,7 +103,7 @@ const TEMPLATES: Template[] = [
     styleType: 'snoopy'
   },
 
-  // ── 2. TICKET CONCERT (GAMBAR 1 NO 4) ────────────────────
+  // ── 2. TICKET CONCERT ────────────────────────────────────
   {
     id: 'ticket-solo',
     name: 'Ticket Solo is Solo',
@@ -113,8 +113,8 @@ const TEMPLATES: Template[] = [
     usesCount: '3.821 uses',
     photosCount: 4,
     recommendedLayout: 'strip4',
-    bg: '#fcf8f2', // Vintage Ticket Cream
-    frame: '#7f1d1d', // Marun Gelap Scalloped
+    bg: '#fcf8f2',
+    frame: '#7f1d1d',
     frameWidth: 16,
     rounded: 12,
     gap: 12,
@@ -126,7 +126,7 @@ const TEMPLATES: Template[] = [
     styleType: 'ticket'
   },
 
-  // ── 3. POLKADOT COKLAT BIRU (GAMBAR 1 NO 1) ──────────────
+  // ── 3. POLKADOT BROWN ────────────────────────────────────
   {
     id: 'safari-polkadot-brown',
     name: 'Safari Polkadot Brown',
@@ -136,8 +136,8 @@ const TEMPLATES: Template[] = [
     usesCount: '6.354 uses',
     photosCount: 6,
     recommendedLayout: 'grid6',
-    bg: '#2b1810', // Dark Chocolate Brown
-    frame: '#bae6fd', // Baby Blue Dots
+    bg: '#2b1810',
+    frame: '#bae6fd',
     frameWidth: 0,
     rounded: 14,
     gap: 14,
@@ -149,7 +149,7 @@ const TEMPLATES: Template[] = [
     styleType: 'polkadot-brown'
   },
 
-  // ── 4. POLKADOT BLUE LACE (GAMBAR 1 NO 2) ────────────────
+  // ── 4. POLKADOT BLUE LACE ────────────────────────────────
   {
     id: 'safari-polkadot-blue',
     name: 'Safari Polkadot Blue & Lace',
@@ -159,8 +159,8 @@ const TEMPLATES: Template[] = [
     usesCount: '4.283 uses',
     photosCount: 6,
     recommendedLayout: 'grid6',
-    bg: '#1e293b', // Deep Navy Blue
-    frame: '#cbd5e1', // Renda renda putih
+    bg: '#1e293b',
+    frame: '#cbd5e1',
     frameWidth: 0,
     rounded: 14,
     gap: 14,
@@ -172,7 +172,7 @@ const TEMPLATES: Template[] = [
     styleType: 'polkadot-blue-lace'
   },
 
-  // ── 5. KORAN "FOTO KITA BLUR" (GAMBAR 2 NO 1) ───────────
+  // ── 5. KORAN "FOTO KITA BLUR" ────────────────────────────
   {
     id: 'koran-foto-blur',
     name: 'Koran Foto Kita Blur',
@@ -182,7 +182,7 @@ const TEMPLATES: Template[] = [
     usesCount: '21.122 uses',
     photosCount: 2,
     recommendedLayout: 'hero1sub2',
-    bg: '#fafaf9', // Newspaper White/Warm
+    bg: '#fafaf9',
     frame: '#1c1917',
     frameWidth: 2,
     rounded: 4,
@@ -195,7 +195,7 @@ const TEMPLATES: Template[] = [
     styleType: 'newspaper-blur'
   },
 
-  // ── 6. COUPLE 8 MINIMAL (GAMBAR 2 NO 2) ─────────────────
+  // ── 6. COUPLE MINIMAL ────────────────────────────────────
   {
     id: 'couple-8-minimal',
     name: 'Couple 8 Split Studio',
@@ -218,7 +218,7 @@ const TEMPLATES: Template[] = [
     styleType: 'couple-minimal'
   },
 
-  // ── 7. BATIK VINTAGE LUMORA (GAMBAR 2 NO 3) ──────────────
+  // ── 7. BATIK VINTAGE ─────────────────────────────────────
   {
     id: 'frame-batik-vintage',
     name: 'Frame Batik Nusantara',
@@ -228,8 +228,8 @@ const TEMPLATES: Template[] = [
     usesCount: '1.810 uses',
     photosCount: 8,
     recommendedLayout: 'grid8',
-    bg: '#fbf7ee', // Krem Batik
-    frame: '#ca8a04', // Emas Batik
+    bg: '#fbf7ee',
+    frame: '#ca8a04',
     frameWidth: 0,
     rounded: 8,
     gap: 12,
@@ -241,7 +241,7 @@ const TEMPLATES: Template[] = [
     styleType: 'batik'
   },
 
-  // ── 8. DENIM & GOLD STARS KK STUDIO (GAMBAR 2 NO 4) ─────
+  // ── 8. KK STUDIO DENIM STARS ─────────────────────────────
   {
     id: 'kk-studio-denim',
     name: 'KK Studio Denim Stars 4R',
@@ -251,8 +251,8 @@ const TEMPLATES: Template[] = [
     usesCount: '4.827 uses',
     photosCount: 8,
     recommendedLayout: 'grid8',
-    bg: '#1e3a5f', // Tekstur Jeans Denim
-    frame: '#fef08a', // Bintang Emas & Renda
+    bg: '#1e3a5f',
+    frame: '#fef08a',
     frameWidth: 0,
     rounded: 8,
     gap: 12,
@@ -262,6 +262,130 @@ const TEMPLATES: Template[] = [
     subText: 'GOLD STARS & DENIM',
     filter: 'contrast(108%) saturate(115%)',
     styleType: 'denim-stars'
+  },
+
+  // ════════════════════════════════════════════════════════
+  // TEMPLATE BARU — 5 TEMPLATE DARI FOTO USER
+  // ════════════════════════════════════════════════════════
+
+  // ── 9. POLAROID DENIM (foto 1: kamera polaroid denim biru, 4 foto filmstrip) ──
+  {
+    id: 'polaroid-denim',
+    name: 'Polaroid Denim Filmstrip',
+    category: 'Karakter & Kartun',
+    tag: 'Free',
+    tagColor: 'bg-purple-600 text-white',
+    usesCount: '0 uses',
+    photosCount: 4,
+    recommendedLayout: 'strip4',
+    bg: '#1e3a5f',
+    bgImage: '/templates/polaroid-denim.jpg',
+    frame: '#ffffff',
+    frameWidth: 3,
+    rounded: 4,
+    gap: 0,
+    pad: 0,
+    textColor: '#ffffff',
+    labelText: 'Polaroid Memories',
+    subText: 'FRAMERIO × ONE STEP 2',
+    filter: 'none',
+    styleType: 'bgimage-strip4'
+  },
+
+  // ── 10. THE 1975 NEWSPAPER (foto 2: koran hitam putih, 3 foto filmstrip) ──
+  {
+    id: 'the1975-newspaper',
+    name: 'The 1975 — About You',
+    category: 'Tiket & Majalah',
+    tag: 'Free',
+    tagColor: 'bg-purple-600 text-white',
+    usesCount: '0 uses',
+    photosCount: 3,
+    recommendedLayout: 'strip3',
+    bg: '#f5f0e8',
+    bgImage: '/templates/the1975-newspaper.jpg',
+    frame: '#111111',
+    frameWidth: 2,
+    rounded: 0,
+    gap: 0,
+    pad: 0,
+    textColor: '#111111',
+    labelText: 'ABOUT YOU',
+    subText: 'THE 1975 • DAILY REPORT',
+    filter: 'grayscale(100%) contrast(110%)',
+    styleType: 'bgimage-strip3'
+  },
+
+  // ── 11. SNOOPY DENIM RECEIPTIFY (foto 3: denim + snoopy + kwitansi, 4 foto) ──
+  {
+    id: 'snoopy-denim-receiptify',
+    name: 'Snoopy Denim Receiptify',
+    category: 'Karakter & Kartun',
+    tag: 'Free',
+    tagColor: 'bg-purple-600 text-white',
+    usesCount: '0 uses',
+    photosCount: 4,
+    recommendedLayout: 'strip4',
+    bg: '#4a6584',
+    bgImage: '/templates/snoopy-denim-receiptify.jpg',
+    frame: '#ffffff',
+    frameWidth: 3,
+    rounded: 4,
+    gap: 0,
+    pad: 0,
+    textColor: '#ffffff',
+    labelText: 'My Receiptify',
+    subText: 'LAST MONTH • FRAMERIO',
+    filter: 'none',
+    styleType: 'bgimage-strip4'
+  },
+
+  // ── 12. POLAROID BROWN AESTHETIC (foto 4: kamera polaroid background beige, 3 foto) ──
+  {
+    id: 'polaroid-brown-aesthetic',
+    name: 'Polaroid Brown Aesthetic',
+    category: 'Karakter & Kartun',
+    tag: 'Free',
+    tagColor: 'bg-purple-600 text-white',
+    usesCount: '0 uses',
+    photosCount: 3,
+    recommendedLayout: 'strip3',
+    bg: '#c9a882',
+    bgImage: '/templates/polaroid-brown-aesthetic.jpg',
+    frame: '#ffffff',
+    frameWidth: 3,
+    rounded: 4,
+    gap: 0,
+    pad: 0,
+    textColor: '#5c3d1e',
+    labelText: 'My Girl ♥ Love',
+    subText: 'FRAMERIO × POLAROID',
+    filter: 'sepia(10%) warmth(5%)',
+    styleType: 'bgimage-strip3'
+  },
+
+  // ── 13. COOL MEMORIES NAVY (foto 5: crumpled navy paper, 2 foto strip vintage) ──
+  {
+    id: 'cool-memories-navy',
+    name: 'Cool Memories Navy',
+    category: 'Tiket & Majalah',
+    tag: 'Free',
+    tagColor: 'bg-purple-600 text-white',
+    usesCount: '0 uses',
+    photosCount: 2,
+    recommendedLayout: 'strip2',
+    bg: '#1a2744',
+    bgImage: '/templates/cool-memories-navy.jpg',
+    frame: '#f0e6d0',
+    frameWidth: 6,
+    rounded: 4,
+    gap: 0,
+    pad: 0,
+    textColor: '#f0e6d0',
+    labelText: 'cool memories',
+    subText: 'GOT HITCHED • FRAMERIO',
+    filter: 'none',
+    styleType: 'bgimage-strip2'
   }
 ]
 
@@ -285,6 +409,73 @@ async function composeLayout(
   const canvas = document.createElement('canvas')
   const ctx = canvas.getContext('2d')!
   const pad = tpl.pad * 2, gap = tpl.gap * 2, fw = tpl.frameWidth * 2, rx = tpl.rounded * 2
+
+  // ── Style: BGIMAGE (template gambar dari foto user) ────────
+  if (tpl.styleType && tpl.styleType.startsWith('bgimage-')) {
+    const count = tpl.photosCount || 4
+    // Proporsi portrait seperti foto template (rasio 9:16)
+    const cw = 540
+    const ch = 960
+    canvas.width = cw; canvas.height = ch
+
+    // 1. Gambar template dari file publik sebagai background
+    if (tpl.bgImage) {
+      try {
+        const bgImg = await new Promise<HTMLImageElement>((resolve, reject) => {
+          const img = new Image()
+          img.onload = () => resolve(img)
+          img.onerror = reject
+          img.src = tpl.bgImage!
+        })
+        ctx.drawImage(bgImg, 0, 0, cw, ch)
+      } catch (e) {
+        ctx.fillStyle = tpl.bg || '#1a1a2e'
+        ctx.fillRect(0, 0, cw, ch)
+      }
+    } else {
+      ctx.fillStyle = tpl.bg || '#ffffff'
+      ctx.fillRect(0, 0, cw, ch)
+    }
+
+    // 2. Tempatkan foto-foto sesuai posisi filmstrip/strip di gambar template
+    // Area foto: umumnya 35-70% tinggi dari tengah ke bawah di tiap template ini
+    const photoAreaTop    = Math.round(ch * 0.34)
+    const photoAreaBottom = Math.round(ch * 0.88)
+    const photoAreaLeft   = Math.round(cw * 0.22)
+    const photoAreaRight  = Math.round(cw * 0.78)
+    const photoAreaH      = photoAreaBottom - photoAreaTop
+    const photoAreaW      = photoAreaRight - photoAreaLeft
+
+    const gapPx = count === 2 ? 20 : 10
+    const totalGap = gapPx * (count - 1)
+    const cellH = Math.floor((photoAreaH - totalGap) / count)
+    const cellW = photoAreaW
+
+    imgs.slice(0, count).forEach((img, i) => {
+      const py = photoAreaTop + i * (cellH + gapPx)
+      const px = photoAreaLeft
+
+      ctx.save()
+      ctx.beginPath()
+      ctx.roundRect(px, py, cellW, cellH, 6)
+      ctx.clip()
+      // Cover crop
+      const imgRatio = img.naturalWidth / img.naturalHeight
+      const cellRatio = cellW / cellH
+      let sx = 0, sy = 0, sw = img.naturalWidth, sh = img.naturalHeight
+      if (imgRatio > cellRatio) {
+        sw = Math.floor(sh * cellRatio)
+        sx = Math.floor((img.naturalWidth - sw) / 2)
+      } else {
+        sh = Math.floor(sw / cellRatio)
+        sy = Math.floor((img.naturalHeight - sh) / 2)
+      }
+      ctx.drawImage(img, sx, sy, sw, sh, px, py, cellW, cellH)
+      ctx.restore()
+    })
+
+    return canvas.toDataURL('image/jpeg', 0.95)
+  }
 
   // ── Style: TICKET CONCERT ─────────────────────────────────
   if (tpl.styleType === 'ticket') {
@@ -750,6 +941,47 @@ function CollagePreview({ shots, tpl, size = 'md' }: {
 }) {
   const count = tpl.photosCount || 4
   const imgs = shots.slice(0, count)
+
+  // ── Pratinjau BGIMAGE TEMPLATES (foto user dgn background gambar) ──
+  if (tpl.styleType && tpl.styleType.startsWith('bgimage-')) {
+    return (
+      <div
+        className="w-full rounded-2xl overflow-hidden shadow-md relative bg-cover bg-center"
+        style={{
+          backgroundImage: tpl.bgImage ? `url(${tpl.bgImage})` : undefined,
+          backgroundColor: tpl.bg || '#1a1a2e',
+          aspectRatio: '9/16'
+        }}
+      >
+        {/* overlay tipis agar foto jelas */}
+        <div className="absolute inset-0 bg-black/10" />
+
+        {/* Area foto filmstrip: mengikuti proporsi template */}
+        <div
+          className="absolute flex flex-col gap-[2px]"
+          style={{
+            top: '34%',
+            left: '22%',
+            right: '22%',
+            bottom: '12%'
+          }}
+        >
+          {Array.from({ length: Math.min(count, 4) }).map((_, i) => (
+            <div
+              key={i}
+              className="flex-1 rounded-[2px] overflow-hidden"
+              style={{
+                backgroundColor: 'rgba(255,255,255,0.15)',
+                border: '1px solid rgba(255,255,255,0.5)'
+              }}
+            >
+              {imgs[i] ? <img src={imgs[i]} className="w-full h-full object-cover" /> : null}
+            </div>
+          ))}
+        </div>
+      </div>
+    )
+  }
 
   // ── Pratinjau TIKET KONSER ──
   if (tpl.styleType === 'ticket') {
