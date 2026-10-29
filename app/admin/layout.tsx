@@ -8,6 +8,7 @@ import BrandLogo from '@/components/BrandLogo'
 const navItems = [
   { href: '/admin', label: 'Dashboard', icon: '◈' },
   { href: '/admin/photos', label: 'Lihat Foto', icon: '◉' },
+  { href: '/admin/templates', label: 'Kelola Template', icon: '▣' },
   { href: '/admin/users', label: 'Users', icon: '◎' },
   { href: '/admin/subscriptions', label: 'Subscriptions', icon: '◇' },
 ]

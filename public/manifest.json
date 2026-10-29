@@ -1,0 +1,18 @@
+{
+  "name": "Framerio — Studio Photobooth",
+  "short_name": "Framerio",
+  "description": "Studio photobooth digital bergaya konsol retro premium. Cetak photostrip dan simpan momenmu.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#cfcecb",
+  "theme_color": "#e85200",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
+

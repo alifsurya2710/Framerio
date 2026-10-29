@@ -1,15 +1,35 @@
 'use client'
 import { useEffect, useRef, useState } from 'react'
+import CustomTemplateModal from './CustomTemplateModal'
+import Link from 'next/link'
 
 /* ════════════════════════════════════════════════════════════
    TYPES
 ════════════════════════════════════════════════════════════ */
-type Layout = 'strip4' | 'strip2' | 'grid4' | 'wide2' | 'solo'
+export type Layout = 
+  | 'strip4' 
+  | 'strip3' 
+  | 'strip2' 
+  | 'grid4' 
+  | 'grid6' 
+  | 'grid8' 
+  | 'grid3' 
+  | 'wide2' 
+  | 'hero1sub2' 
+  | 'polaroid2' 
+  | 'solo'
 
-type Template = {
+type Category = 'Semua' | 'Karakter & Kartun' | 'Tiket & Majalah' | 'Polkadot & Renda' | 'Batik & Denim'
+
+export type Template = {
   id: string
   name: string
-  emoji: string
+  category: Category | string
+  tag: string
+  tagColor?: string
+  usesCount: string
+  photosCount: number
+  recommendedLayout: Layout | string
   bg: string
   frame: string
   frameWidth: number
@@ -18,333 +38,890 @@ type Template = {
   pad: number
   textColor: string
   labelText: string
+  subText?: string
   filter: string
-  previewBorder: string
+  styleType: 
+    | 'snoopy' 
+    | 'polkadot-brown' 
+    | 'polkadot-blue-lace' 
+    | 'ticket' 
+    | 'newspaper-blur' 
+    | 'couple-minimal' 
+    | 'batik' 
+    | 'denim-stars'
+    | 'love'
+    | 'retro'
+    | 'custom'
+    | string
+  bgImage?: string | null
+  isCustom?: boolean
+  isPublic?: boolean
 }
 
 type LayoutDef = { id: Layout; name: string; count: number }
 
 /* ════════════════════════════════════════════════════════════
-   LAYOUTS
+   LAYOUTS (MENDUKUNG HINGGA 6 & 8 FOTO SEPERTI GAMBAR)
 ════════════════════════════════════════════════════════════ */
-const LAYOUTS: LayoutDef[] = [
-  { id: 'strip4', name: 'Strip 4', count: 4 },
-  { id: 'strip2', name: 'Strip 2', count: 2 },
-  { id: 'grid4',  name: 'Grid 2×2', count: 4 },
-  { id: 'wide2',  name: 'Wide 2', count: 2 },
-  { id: 'solo',   name: 'Solo', count: 1 },
+export const LAYOUTS: LayoutDef[] = [
+  { id: 'strip4',    name: 'Strip 4',       count: 4 },
+  { id: 'strip3',    name: 'Strip 3',       count: 3 },
+  { id: 'strip2',    name: 'Strip 2',       count: 2 },
+  { id: 'grid4',     name: 'Grid 2×2',      count: 4 },
+  { id: 'grid6',     name: 'Grid 6 (2×3)',  count: 6 },
+  { id: 'grid8',     name: 'Grid 8 (2×4)',  count: 8 },
+  { id: 'grid3',     name: 'Grid 1×3',      count: 3 },
+  { id: 'wide2',     name: 'Wide Postcard', count: 2 },
+  { id: 'hero1sub2', name: 'Majalah 1+2',   count: 3 },
+  { id: 'polaroid2', name: 'Polaroid Duo',  count: 2 },
 ]
 
 /* ════════════════════════════════════════════════════════════
-   25 TEMPLATES
+   8 TEMPLATE PERSIS SEPERTI GAMBAR 1 & 2
 ════════════════════════════════════════════════════════════ */
 const TEMPLATES: Template[] = [
-  // 1
-  { id:'minimal', name:'Minimal', emoji:'🤍',
-    bg:'#ffffff', frame:'#eeeeee', frameWidth:16, rounded:0, gap:8, pad:20,
-    textColor:'#aaaaaa', labelText:'FRAMERIO', filter:'none', previewBorder:'#e5e5e5' },
-  // 2
-  { id:'korean', name:'Korean Film', emoji:'🎞',
-    bg:'#f5f0e8', frame:'#e8dfc8', frameWidth:22, rounded:4, gap:8, pad:24,
-    textColor:'#9b8c6e', labelText:'필름 FRAMERIO ✦', filter:'sepia(20%) contrast(105%)', previewBorder:'#d4c5a9' },
-  // 3
-  { id:'vintage', name:'Vintage', emoji:'📷',
-    bg:'#e8dcc8', frame:'#c8a96e', frameWidth:16, rounded:2, gap:10, pad:20,
-    textColor:'#7a5c3a', labelText:'✦ VINTAGE STUDIO ✦', filter:'sepia(35%) saturate(80%)', previewBorder:'#c8a96e' },
-  // 4
-  { id:'pink', name:'Pink Aura', emoji:'🌸',
-    bg:'#fff0f5', frame:'#ffb6c8', frameWidth:16, rounded:14, gap:10, pad:20,
-    textColor:'#d4608a', labelText:'♡ FRAMERIO ♡', filter:'saturate(110%) hue-rotate(-8deg)', previewBorder:'#ffb6c8' },
-  // 5
-  { id:'dark', name:'Dark Film', emoji:'🖤',
-    bg:'#181818', frame:'#303030', frameWidth:18, rounded:6, gap:8, pad:20,
-    textColor:'#606060', labelText:'● FRAMERIO STUDIO', filter:'contrast(110%) brightness(88%)', previewBorder:'#3a3a3a' },
-  // 6
-  { id:'neon', name:'Y2K Neon', emoji:'⚡',
-    bg:'#0d0d1c', frame:'#7c3aed', frameWidth:14, rounded:0, gap:6, pad:18,
-    textColor:'#a78bfa', labelText:'⚡ FRAMERIO 2026 ⚡', filter:'saturate(160%) hue-rotate(220deg) brightness(110%)', previewBorder:'#7c3aed' },
-  // 7
-  { id:'pastel', name:'Pastel Sky', emoji:'🩵',
-    bg:'#e8f4fd', frame:'#7dd3fc', frameWidth:14, rounded:18, gap:12, pad:22,
-    textColor:'#0369a1', labelText:'✿ FRAMERIO ✿', filter:'saturate(90%) brightness(105%)', previewBorder:'#7dd3fc' },
-  // 8
-  { id:'retro', name:'Retro Orange', emoji:'🟠',
-    bg:'#fff7ed', frame:'#e85200', frameWidth:18, rounded:0, gap:10, pad:22,
-    textColor:'#c2410c', labelText:'FRAMERIO / 2026', filter:'sepia(8%) saturate(120%)', previewBorder:'#e85200' },
-  // 9
-  { id:'forest', name:'Forest', emoji:'🌿',
-    bg:'#f0f7ee', frame:'#4a7c59', frameWidth:16, rounded:8, gap:10, pad:20,
-    textColor:'#2d5a3d', labelText:'✦ NATURE STUDIO ✦', filter:'saturate(90%) hue-rotate(10deg)', previewBorder:'#4a7c59' },
-  // 10
-  { id:'rose', name:'Rose Gold', emoji:'🌹',
-    bg:'#fdf2f0', frame:'#c9736a', frameWidth:16, rounded:8, gap:10, pad:22,
-    textColor:'#8b3a34', labelText:'◆ ROSE FRAMERIO ◆', filter:'sepia(15%) saturate(120%) hue-rotate(-5deg)', previewBorder:'#c9736a' },
-  // 11
-  { id:'polaroid', name:'Polaroid', emoji:'🟦',
-    bg:'#ffffff', frame:'#ffffff', frameWidth:0, rounded:4, gap:6, pad:14,
-    textColor:'#555555', labelText:'framerio 📷', filter:'none', previewBorder:'#cccccc' },
-  // 12
-  { id:'midnight', name:'Midnight', emoji:'🌙',
-    bg:'#0f1729', frame:'#1e3a5f', frameWidth:16, rounded:10, gap:8, pad:20,
-    textColor:'#4a90d9', labelText:'✦ MIDNIGHT STUDIO', filter:'brightness(85%) saturate(80%) hue-rotate(200deg)', previewBorder:'#1e3a5f' },
-  // 13
-  { id:'cherry', name:'Cherry', emoji:'🍒',
-    bg:'#fff0ee', frame:'#e53935', frameWidth:14, rounded:6, gap:8, pad:18,
-    textColor:'#b71c1c', labelText:'♥ FRAMERIO ♥', filter:'saturate(120%) hue-rotate(-15deg)', previewBorder:'#e53935' },
-  // 14
-  { id:'cafe', name:'Café Latte', emoji:'☕',
-    bg:'#f5efe6', frame:'#a67c52', frameWidth:18, rounded:6, gap:10, pad:22,
-    textColor:'#6b4226', labelText:'CAFÉ FRAMERIO', filter:'sepia(25%) brightness(98%)', previewBorder:'#a67c52' },
-  // 15
-  { id:'holographic', name:'Holo', emoji:'🌈',
-    bg:'linear-gradient(135deg,#fce4f3,#e8eaff,#d4f5e9)', frame:'#c084fc', frameWidth:14, rounded:16, gap:8, pad:18,
-    textColor:'#7c3aed', labelText:'✦ HOLOGRAPHIC ✦', filter:'saturate(130%) hue-rotate(15deg) brightness(108%)', previewBorder:'#c084fc' },
-  // 16
-  { id:'sage', name:'Sage Green', emoji:'🍃',
-    bg:'#eef2eb', frame:'#87a878', frameWidth:14, rounded:10, gap:10, pad:20,
-    textColor:'#4a6741', labelText:'sage. framerio', filter:'saturate(80%) brightness(102%)', previewBorder:'#87a878' },
-  // 17
-  { id:'denim', name:'Denim', emoji:'👖',
-    bg:'#eaf0f8', frame:'#3b5998', frameWidth:18, rounded:4, gap:8, pad:22,
-    textColor:'#2b4480', labelText:'FRAMERIO DENIM', filter:'saturate(90%) hue-rotate(200deg)', previewBorder:'#3b5998' },
-  // 18
-  { id:'gold', name:'Gold Luxury', emoji:'✨',
-    bg:'#1a1400', frame:'#d4af37', frameWidth:20, rounded:4, gap:10, pad:24,
-    textColor:'#d4af37', labelText:'◈ FRAMERIO LUXURY ◈', filter:'sepia(20%) saturate(110%) brightness(90%)', previewBorder:'#d4af37' },
-  // 19
-  { id:'bubblegum', name:'Bubblegum', emoji:'🍬',
-    bg:'#fff5fa', frame:'#ff80b0', frameWidth:12, rounded:20, gap:12, pad:18,
-    textColor:'#ff4d94', labelText:'✿ bubble.framerio ✿', filter:'saturate(130%) brightness(107%) hue-rotate(-5deg)', previewBorder:'#ff80b0' },
-  // 20
-  { id:'terracotta', name:'Terracotta', emoji:'🏺',
-    bg:'#f5e8df', frame:'#c4704a', frameWidth:16, rounded:4, gap:10, pad:20,
-    textColor:'#8b4513', labelText:'TERRA FRAMERIO', filter:'sepia(20%) saturate(110%) hue-rotate(-10deg)', previewBorder:'#c4704a' },
-  // 21
-  { id:'arctic', name:'Arctic', emoji:'🧊',
-    bg:'#f0f8ff', frame:'#a8d8ea', frameWidth:14, rounded:16, gap:10, pad:22,
-    textColor:'#4a90b8', labelText:'❄ FRAMERIO ❄', filter:'saturate(70%) brightness(108%) hue-rotate(190deg)', previewBorder:'#a8d8ea' },
-  // 22
-  { id:'film', name:'Film Noir', emoji:'🎬',
-    bg:'#111111', frame:'#888888', frameWidth:14, rounded:0, gap:4, pad:16,
-    textColor:'#777777', labelText:'FRAMERIO NOIR', filter:'grayscale(80%) contrast(120%)', previewBorder:'#555555' },
-  // 23
-  { id:'lavender', name:'Lavender', emoji:'💜',
-    bg:'#f5f0ff', frame:'#9b72cf', frameWidth:16, rounded:14, gap:10, pad:20,
-    textColor:'#6b3fa0', labelText:'✦ lavender.framerio', filter:'saturate(90%) hue-rotate(255deg) brightness(105%)', previewBorder:'#9b72cf' },
-  // 24
-  { id:'sunset', name:'Sunset', emoji:'🌅',
-    bg:'#fff3e0', frame:'#ff7043', frameWidth:16, rounded:6, gap:8, pad:20,
-    textColor:'#bf360c', labelText:'SUNSET FRAMERIO', filter:'saturate(130%) hue-rotate(-20deg) brightness(105%)', previewBorder:'#ff7043' },
-  // 25
-  { id:'matrix', name:'Matrix', emoji:'💚',
-    bg:'#001200', frame:'#00ff41', frameWidth:10, rounded:0, gap:4, pad:14,
-    textColor:'#00cc33', labelText:'[FRAMERIO.EXE]', filter:'saturate(200%) hue-rotate(100deg) brightness(80%)', previewBorder:'#00ff41' },
+  // ── 1. SNOOPY & MIFFY (GAMBAR 1 NO 3) ───────────────────
+  {
+    id: 'snoopy-miffy',
+    name: 'snoopy & miffy',
+    category: 'Karakter & Kartun',
+    tag: 'Free',
+    tagColor: 'bg-purple-600 text-white',
+    usesCount: '5.638 uses',
+    photosCount: 3,
+    recommendedLayout: 'strip3',
+    bg: '#ffffff',
+    frame: '#475569',
+    frameWidth: 3,
+    rounded: 18,
+    gap: 16,
+    pad: 24,
+    textColor: '#1e293b',
+    labelText: 'SNOOPY & MIFFY',
+    subText: 'DREAMING TOGETHER',
+    filter: 'brightness(103%) contrast(104%)',
+    styleType: 'snoopy'
+  },
+
+  // ── 2. TICKET CONCERT (GAMBAR 1 NO 4) ────────────────────
+  {
+    id: 'ticket-solo',
+    name: 'Ticket Solo is Solo',
+    category: 'Tiket & Majalah',
+    tag: 'Free',
+    tagColor: 'bg-purple-600 text-white',
+    usesCount: '3.821 uses',
+    photosCount: 4,
+    recommendedLayout: 'strip4',
+    bg: '#fcf8f2', // Vintage Ticket Cream
+    frame: '#7f1d1d', // Marun Gelap Scalloped
+    frameWidth: 16,
+    rounded: 12,
+    gap: 12,
+    pad: 20,
+    textColor: '#7f1d1d',
+    labelText: 'Solo is Solo',
+    subText: 'ROW B2 • SHOW 02 • SEPTEMBER 20.00',
+    filter: 'sepia(18%) contrast(105%)',
+    styleType: 'ticket'
+  },
+
+  // ── 3. POLKADOT COKLAT BIRU (GAMBAR 1 NO 1) ──────────────
+  {
+    id: 'safari-polkadot-brown',
+    name: 'Safari Polkadot Brown',
+    category: 'Polkadot & Renda',
+    tag: 'Free',
+    tagColor: 'bg-purple-600 text-white',
+    usesCount: '6.354 uses',
+    photosCount: 6,
+    recommendedLayout: 'grid6',
+    bg: '#2b1810', // Dark Chocolate Brown
+    frame: '#bae6fd', // Baby Blue Dots
+    frameWidth: 0,
+    rounded: 14,
+    gap: 14,
+    pad: 22,
+    textColor: '#bae6fd',
+    labelText: 'framerio booth',
+    subText: 'SAFARI POLKADOT',
+    filter: 'contrast(106%) saturate(110%)',
+    styleType: 'polkadot-brown'
+  },
+
+  // ── 4. POLKADOT BLUE LACE (GAMBAR 1 NO 2) ────────────────
+  {
+    id: 'safari-polkadot-blue',
+    name: 'Safari Polkadot Blue & Lace',
+    category: 'Polkadot & Renda',
+    tag: 'Free',
+    tagColor: 'bg-purple-600 text-white',
+    usesCount: '4.283 uses',
+    photosCount: 6,
+    recommendedLayout: 'grid6',
+    bg: '#1e293b', // Deep Navy Blue
+    frame: '#cbd5e1', // Renda renda putih
+    frameWidth: 0,
+    rounded: 14,
+    gap: 14,
+    pad: 22,
+    textColor: '#ffffff',
+    labelText: 'framerio booth',
+    subText: 'VINTAGE LACE EDITION',
+    filter: 'contrast(108%) saturate(105%)',
+    styleType: 'polkadot-blue-lace'
+  },
+
+  // ── 5. KORAN "FOTO KITA BLUR" (GAMBAR 2 NO 1) ───────────
+  {
+    id: 'koran-foto-blur',
+    name: 'Koran Foto Kita Blur',
+    category: 'Tiket & Majalah',
+    tag: 'Free',
+    tagColor: 'bg-purple-600 text-white',
+    usesCount: '21.122 uses',
+    photosCount: 2,
+    recommendedLayout: 'hero1sub2',
+    bg: '#fafaf9', // Newspaper White/Warm
+    frame: '#1c1917',
+    frameWidth: 2,
+    rounded: 4,
+    gap: 12,
+    pad: 18,
+    textColor: '#b91c1c',
+    labelText: 'FOTO KITA BLUR',
+    subText: 'Tak Banyak Yang Kulihat • Sal Priadi',
+    filter: 'contrast(105%)',
+    styleType: 'newspaper-blur'
+  },
+
+  // ── 6. COUPLE 8 MINIMAL (GAMBAR 2 NO 2) ─────────────────
+  {
+    id: 'couple-8-minimal',
+    name: 'Couple 8 Split Studio',
+    category: 'Karakter & Kartun',
+    tag: 'Free',
+    tagColor: 'bg-purple-600 text-white',
+    usesCount: '19.301 uses',
+    photosCount: 4,
+    recommendedLayout: 'strip4',
+    bg: '#ffffff',
+    frame: '#f1f5f9',
+    frameWidth: 6,
+    rounded: 2,
+    gap: 8,
+    pad: 12,
+    textColor: '#64748b',
+    labelText: 'COUPLE MOMENTS',
+    subText: 'FRAMERIO MEMORIES',
+    filter: 'none',
+    styleType: 'couple-minimal'
+  },
+
+  // ── 7. BATIK VINTAGE LUMORA (GAMBAR 2 NO 3) ──────────────
+  {
+    id: 'frame-batik-vintage',
+    name: 'Frame Batik Nusantara',
+    category: 'Batik & Denim',
+    tag: 'Free',
+    tagColor: 'bg-purple-600 text-white',
+    usesCount: '1.810 uses',
+    photosCount: 8,
+    recommendedLayout: 'grid8',
+    bg: '#fbf7ee', // Krem Batik
+    frame: '#ca8a04', // Emas Batik
+    frameWidth: 0,
+    rounded: 8,
+    gap: 12,
+    pad: 20,
+    textColor: '#854d0e',
+    labelText: 'BATIK FRAMERIO',
+    subText: 'NUSANTARA HERITAGE',
+    filter: 'sepia(15%) contrast(105%)',
+    styleType: 'batik'
+  },
+
+  // ── 8. DENIM & GOLD STARS KK STUDIO (GAMBAR 2 NO 4) ─────
+  {
+    id: 'kk-studio-denim',
+    name: 'KK Studio Denim Stars 4R',
+    category: 'Batik & Denim',
+    tag: 'Free',
+    tagColor: 'bg-purple-600 text-white',
+    usesCount: '4.827 uses',
+    photosCount: 8,
+    recommendedLayout: 'grid8',
+    bg: '#1e3a5f', // Tekstur Jeans Denim
+    frame: '#fef08a', // Bintang Emas & Renda
+    frameWidth: 0,
+    rounded: 8,
+    gap: 12,
+    pad: 20,
+    textColor: '#fef08a',
+    labelText: 'KK STUDIO 4R',
+    subText: 'GOLD STARS & DENIM',
+    filter: 'contrast(108%) saturate(115%)',
+    styleType: 'denim-stars'
+  }
 ]
 
 /* ════════════════════════════════════════════════════════════
-   CANVAS UTILITIES
+   CANVAS COMPOSE ENGINE (MENDUKUNG DETAIL TIAP STYLE)
 ════════════════════════════════════════════════════════════ */
-function loadImage(src: string): Promise<HTMLImageElement> {
-  return new Promise((res, rej) => {
-    const img = new Image()
-    img.onload = () => res(img)
-    img.onerror = rej
-    img.src = src
-  })
-}
+async function composeLayout(
+  imgs64: string[],
+  layout: Layout | string,
+  tpl: Template
+): Promise<string> {
+  const imgs: HTMLImageElement[] = await Promise.all(
+    imgs64.map(src => new Promise<HTMLImageElement>((res, rej) => {
+      const img = new Image()
+      img.onload = () => res(img)
+      img.onerror = rej
+      img.src = src
+    }))
+  )
 
-function drawCover(
-  ctx: CanvasRenderingContext2D,
-  img: HTMLImageElement,
-  x: number, y: number, w: number, h: number, rx = 0
-) {
-  const r = Math.max(w / img.width, h / img.height)
-  const nw = img.width * r, nh = img.height * r
-  const nx = x + (w - nw) / 2, ny = y + (h - nh) / 2
-  ctx.save()
-  ctx.beginPath()
-  if (rx > 0) ctx.roundRect(x, y, w, h, rx)
-  else ctx.rect(x, y, w, h)
-  ctx.clip()
-  ctx.drawImage(img, nx, ny, nw, nh)
-  ctx.restore()
-}
-
-async function composeCollage(imgs64: string[], layout: Layout, tpl: Template): Promise<string> {
-  const imgs = await Promise.all(imgs64.map(loadImage))
-  const { bg, frame, frameWidth: fw, rounded: rx, gap, pad, textColor, labelText } = tpl
   const canvas = document.createElement('canvas')
   const ctx = canvas.getContext('2d')!
-  const LABEL_H = 38
+  const pad = tpl.pad * 2, gap = tpl.gap * 2, fw = tpl.frameWidth * 2, rx = tpl.rounded * 2
 
-  function fillBg(w: number, h: number) {
-    if (bg.startsWith('linear-gradient')) {
-      const grad = ctx.createLinearGradient(0, 0, w, h)
-      grad.addColorStop(0, '#fce4f3')
-      grad.addColorStop(0.5, '#e8eaff')
-      grad.addColorStop(1, '#d4f5e9')
-      ctx.fillStyle = grad
-    } else {
-      ctx.fillStyle = bg
-    }
-    ctx.fillRect(0, 0, w, h)
-  }
+  // ── Style: TICKET CONCERT ─────────────────────────────────
+  if (tpl.styleType === 'ticket') {
+    const cw = 500, count = 4
+    const photoH = 240, headerH = 130, footerH = 60
+    const ch = headerH + count * photoH + (count - 1) * gap + footerH + pad * 2
+    canvas.width = cw; canvas.height = ch
 
-  function drawFrame(cw: number, ch: number) {
-    if (fw <= 0) return
-    ctx.strokeStyle = frame; ctx.lineWidth = fw
-    if (rx > 0) {
-      ctx.beginPath(); ctx.roundRect(fw / 2, fw / 2, cw - fw, ch - fw, rx + fw / 2); ctx.stroke()
-    } else {
-      ctx.strokeRect(fw / 2, fw / 2, cw - fw, ch - fw)
-    }
-  }
+    // Scalloped / Marun Border
+    ctx.fillStyle = '#7f1d1d'
+    ctx.fillRect(0, 0, cw, ch)
+    ctx.fillStyle = '#fcf8f2'
+    ctx.fillRect(16, 16, cw - 32, ch - 32)
 
-  function drawLabel(cw: number, ch: number) {
-    ctx.fillStyle = textColor
-    ctx.font = `bold ${Math.round(LABEL_H * 0.52)}px -apple-system, system-ui, sans-serif`
+    // Header Tiket
+    ctx.fillStyle = '#7f1d1d'
+    ctx.font = 'bold 36px serif'
     ctx.textAlign = 'center'
-    ctx.fillText(labelText, cw / 2, ch - fw - 8)
+    ctx.fillText('★ Solo is Solo ★', cw / 2, 60)
+    ctx.font = 'bold 15px monospace'
+    ctx.fillText('ROW B2  •  SHOW 02  •  SEPTEMBER 20.00', cw / 2, 95)
+    ctx.strokeStyle = '#7f1d1d'
+    ctx.lineWidth = 1.5
+    ctx.setLineDash([6, 4])
+    ctx.strokeRect(30, 115, cw - 60, 1)
+    ctx.setLineDash([])
+
+    // Foto-foto
+    const ix = 32, iw = cw - 64
+    imgs.slice(0, count).forEach((img, i) => {
+      const iy = headerH + pad + i * (photoH + gap)
+      ctx.drawImage(img, ix, iy, iw, photoH)
+      ctx.strokeStyle = '#7f1d1d'
+      ctx.lineWidth = 2
+      ctx.strokeRect(ix, iy, iw, photoH)
+    })
+
+    // Footer Tiket
+    ctx.font = 'bold 13px monospace'
+    ctx.fillText('♥ JUST MOMENT • FRAMERIO TICKET ♥', cw / 2, ch - 30)
+    return canvas.toDataURL('image/jpeg', 0.95)
   }
 
-  if (layout === 'strip4' || layout === 'strip2') {
-    const count = layout === 'strip4' ? 4 : 2
-    const usedImgs = imgs.slice(0, count)
-    const cw = 480, photoH = 320
-    const ch = fw * 2 + pad * 2 + count * photoH + (count - 1) * gap + LABEL_H + 12
+  // ── Style: SNOOPY & MIFFY (3 FOTO) ────────────────────────
+  if (tpl.styleType === 'snoopy') {
+    const cw = 480, count = 3
+    const photoH = 340, headerH = 90, footerH = 160
+    const ch = headerH + count * photoH + (count - 1) * gap + footerH + pad * 2
     canvas.width = cw; canvas.height = ch
-    fillBg(cw, ch); drawFrame(cw, ch)
-    const ix = fw + pad, iw = cw - fw * 2 - pad * 2
-    usedImgs.forEach((img, i) => {
-      drawCover(ctx, img, ix, fw + pad + i * (photoH + gap), iw, photoH, rx)
-    })
-    drawLabel(cw, ch)
 
-  } else if (layout === 'grid4') {
-    const usedImgs = imgs.slice(0, 4)
-    const cw = 800, ch = 800
+    // Background Putih Bersih
+    ctx.fillStyle = '#ffffff'
+    ctx.fillRect(0, 0, cw, ch)
+
+    // Header Snoopy Tidur
+    ctx.fillStyle = '#0f172a'
+    ctx.font = 'bold 20px -apple-system, sans-serif'
+    ctx.textAlign = 'center'
+    ctx.fillText('☁️ SNOOPY & MIFFY 🌙', cw / 2, 55)
+
+    const ix = 34, iw = cw - 68
+    imgs.slice(0, count).forEach((img, i) => {
+      const iy = headerH + pad + i * (photoH + gap)
+      // Outline Tipis Hitam Kartun
+      ctx.strokeStyle = '#334155'
+      ctx.lineWidth = 3
+      ctx.strokeRect(ix, iy, iw, photoH)
+      ctx.drawImage(img, ix + 2, iy + 2, iw - 4, photoH - 4)
+
+      // Stiker Lucu di Sisi Frame
+      ctx.font = '24px sans-serif'
+      if (i === 0) ctx.fillText('⭐ ⭐ ⭐', cw - 70, iy + photoH + 20)
+      if (i === 1) ctx.fillText('🐰', ix - 10, iy + photoH - 20)
+      if (i === 2) ctx.fillText('🌸', cw - 50, iy + 40)
+    })
+
+    // Ilustrasi Perahu Kertas Bawah
+    ctx.font = '36px sans-serif'
+    ctx.fillText('⛵ 🐶 🐰 ✨', cw / 2, ch - 80)
+    ctx.font = 'bold 14px monospace'
+    ctx.fillStyle = '#64748b'
+    ctx.fillText('SAILING IN DREAMS • FRAMERIO', cw / 2, ch - 35)
+    return canvas.toDataURL('image/jpeg', 0.95)
+  }
+
+  // ── Style: KORAN "FOTO KITA BLUR" ─────────────────────────
+  if (tpl.styleType === 'newspaper-blur') {
+    const cw = 820, ch = 940
     canvas.width = cw; canvas.height = ch
-    fillBg(cw, ch); drawFrame(cw, ch)
-    const iw = cw - fw * 2 - pad * 2, ih = ch - fw * 2 - pad * 2 - LABEL_H
-    const cw2 = (iw - gap) / 2, ch2 = (ih - gap) / 2
-    usedImgs.forEach((img, i) => {
+
+    ctx.fillStyle = '#fafaf9'
+    ctx.fillRect(0, 0, cw, ch)
+    ctx.strokeStyle = '#1c1917'
+    ctx.lineWidth = 2
+    ctx.strokeRect(16, 16, cw - 32, ch - 32)
+
+    // Header Koran
+    ctx.font = 'bold 13px serif'
+    ctx.fillStyle = '#1c1917'
+    ctx.fillText('SPECIAL EDITION  •  NEWS PHOTOBOOTH BY FRAMERIO  •  SPECIAL EDITION', cw / 2, 45)
+    ctx.beginPath(); ctx.moveTo(25, 58); ctx.lineTo(cw - 25, 58); ctx.stroke()
+
+    // Judul Besar Koran
+    ctx.fillStyle = '#b91c1c'
+    ctx.font = '900 52px serif'
+    ctx.textAlign = 'center'
+    ctx.fillText('FOTO KITA BLUR', cw / 2, 115)
+    ctx.fillStyle = '#1e3a8a'
+    ctx.font = 'italic 28px serif'
+    ctx.fillText('Tak Banyak Yang Kulihat', cw / 2, 155)
+
+    // Foto Utama Besar
+    if (imgs[0]) {
+      ctx.drawImage(imgs[0], 40, 180, cw - 80, 440)
+      ctx.strokeRect(40, 180, cw - 80, 440)
+    }
+
+    // Sub-Foto & Kolom Teks Lagu
+    if (imgs[1]) {
+      ctx.drawImage(imgs[1], 40, 640, 240, 240)
+      ctx.strokeRect(40, 640, 240, 240)
+    }
+
+    // Teks Koran Kanan
+    ctx.textAlign = 'left'
+    ctx.fillStyle = '#1c1917'
+    ctx.font = 'bold 16px -apple-system, sans-serif'
+    ctx.fillText('KAMU BLUEBERRY & AKU PASTRY 🫐🥐', 310, 670)
+
+    ctx.font = '12px serif'
+    ctx.fillStyle = '#44403c'
+    const article = "Lagu Foto Kita Blur mengingatkan bahwa kenangan terbaik tidak selalu hadir dalam kualitas terbaik. Kadang foto yang buram justru menjadi bukti bahwa kita benar-benar sedang hidup di dalam momen itu: tertawa, bergerak, dan menikmati waktu bersama."
+    ctx.fillText(article.substring(0, 65), 310, 710)
+    ctx.fillText(article.substring(65, 130), 310, 730)
+    ctx.fillText(article.substring(130, 195), 310, 750)
+    ctx.fillText(article.substring(195), 310, 770)
+
+    // Player Bar Spotify Style
+    ctx.fillStyle = '#0f172a'
+    ctx.fillRect(310, 810, cw - 350, 60)
+    ctx.fillStyle = '#ffffff'
+    ctx.font = 'bold 13px monospace'
+    ctx.fillText('▶ NOW PLAYING: FOTO KITA BLUR - SAL PRIADI', 330, 845)
+
+    return canvas.toDataURL('image/jpeg', 0.95)
+  }
+
+  // ── Style: POLKADOT COKLAT (SAFARI 6 PHOTOS) ──────────────
+  if (tpl.styleType === 'polkadot-brown') {
+    const cw = 800, ch = 1100
+    canvas.width = cw; canvas.height = ch
+
+    // Dark Chocolate Background
+    ctx.fillStyle = '#2b1810'
+    ctx.fillRect(0, 0, cw, ch)
+
+    // Big Baby Blue Polkadots
+    ctx.fillStyle = '#bae6fd'
+    for (let x = 30; x < cw; x += 160) {
+      for (let y = 30; y < ch; y += 160) {
+        ctx.beginPath()
+        ctx.arc(x, y, 42, 0, Math.PI * 2)
+        ctx.fill()
+      }
+    }
+
+    // 6 Rounded Photos (2 Kolom x 3 Baris)
+    const gapX = 24, gapY = 24, marginX = 40, marginY = 60
+    const cellW = (cw - marginX * 2 - gapX) / 2
+    const cellH = (ch - marginY * 2 - gapY * 2 - 80) / 3
+
+    imgs.slice(0, 6).forEach((img, i) => {
       const col = i % 2, row = Math.floor(i / 2)
-      drawCover(ctx, img, fw + pad + col * (cw2 + gap), fw + pad + row * (ch2 + gap), cw2, ch2, rx)
-    })
-    drawLabel(cw, ch)
+      const px = marginX + col * (cellW + gapX)
+      const py = marginY + row * (cellH + gapY)
 
-  } else if (layout === 'wide2') {
-    const usedImgs = imgs.slice(0, 2)
-    const cw = 1000, ch = 520
-    canvas.width = cw; canvas.height = ch
-    fillBg(cw, ch); drawFrame(cw, ch)
-    const iw = cw - fw * 2 - pad * 2, ih = ch - fw * 2 - pad * 2 - LABEL_H
-    const cw2 = (iw - gap) / 2
-    usedImgs.forEach((img, i) => {
-      drawCover(ctx, img, fw + pad + i * (cw2 + gap), fw + pad, cw2, ih, rx)
-    })
-    drawLabel(cw, ch)
+      ctx.save()
+      ctx.beginPath()
+      ctx.roundRect(px, py, cellW, cellH, 16)
+      ctx.clip()
+      ctx.drawImage(img, px, py, cellW, cellH)
+      ctx.restore()
 
-  } else {
-    const cw = 600, ch = 620
-    canvas.width = cw; canvas.height = ch
-    fillBg(cw, ch); drawFrame(cw, ch)
-    const ix = fw + pad, iy = fw + pad
-    const iw = cw - fw * 2 - pad * 2, ih = ch - fw * 2 - pad * 2 - LABEL_H
-    drawCover(ctx, imgs[0], ix, iy, iw, ih, rx)
-    drawLabel(cw, ch)
+      ctx.strokeStyle = '#ffffff'
+      ctx.lineWidth = 3
+      ctx.beginPath()
+      ctx.roundRect(px, py, cellW, cellH, 16)
+      ctx.stroke()
+    })
+
+    // Watermark Logo Safari Framerio
+    ctx.fillStyle = '#ffffff'
+    ctx.font = 'bold 22px -apple-system, sans-serif'
+    ctx.textAlign = 'center'
+    ctx.fillText('framerio safari booth', cw / 2, ch - 35)
+
+    return canvas.toDataURL('image/jpeg', 0.95)
   }
+
+  // ── Style: POLKADOT BLUE & LACE (SAFARI BLUE) ─────────────
+  if (tpl.styleType === 'polkadot-blue-lace') {
+    const cw = 800, ch = 1100
+    canvas.width = cw; canvas.height = ch
+
+    // Navy Blue Background
+    ctx.fillStyle = '#1e293b'
+    ctx.fillRect(0, 0, cw, ch)
+
+    // White Polkadots
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.4)'
+    for (let x = 40; x < cw; x += 100) {
+      for (let y = 40; y < ch; y += 100) {
+        ctx.beginPath()
+        ctx.arc(x, y, 9, 0, Math.PI * 2)
+        ctx.fill()
+      }
+    }
+
+    // Renda Putih Vertikal Sisi Kiri
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.8)'
+    for (let y = 0; y < ch; y += 24) {
+      ctx.beginPath()
+      ctx.arc(28, y + 12, 14, 0, Math.PI * 2)
+      ctx.fill()
+    }
+
+    // 6 Rounded Photos
+    const gapX = 24, gapY = 24, marginX = 64, marginY = 60
+    const cellW = (cw - marginX - 40 - gapX) / 2
+    const cellH = (ch - marginY * 2 - gapY * 2 - 80) / 3
+
+    imgs.slice(0, 6).forEach((img, i) => {
+      const col = i % 2, row = Math.floor(i / 2)
+      const px = marginX + col * (cellW + gapX)
+      const py = marginY + row * (cellH + gapY)
+
+      ctx.save()
+      ctx.beginPath()
+      ctx.roundRect(px, py, cellW, cellH, 14)
+      ctx.clip()
+      ctx.drawImage(img, px, py, cellW, cellH)
+      ctx.restore()
+
+      ctx.strokeStyle = '#ffffff'
+      ctx.lineWidth = 2.5
+      ctx.beginPath()
+      ctx.roundRect(px, py, cellW, cellH, 14)
+      ctx.stroke()
+    })
+
+    ctx.fillStyle = '#ffffff'
+    ctx.font = 'bold 22px -apple-system, sans-serif'
+    ctx.textAlign = 'center'
+    ctx.fillText('framerio safari booth • blue lace', cw / 2, ch - 35)
+
+    return canvas.toDataURL('image/jpeg', 0.95)
+  }
+
+  // ── Style: BATIK NUSANTARA (8 FOTO) ───────────────────────
+  if (tpl.styleType === 'batik') {
+    const cw = 860, ch = 1140
+    canvas.width = cw; canvas.height = ch
+
+    ctx.fillStyle = '#fbf7ee'
+    ctx.fillRect(0, 0, cw, ch)
+
+    // Border Batik Emas dan Motif Vertikal Tengah
+    ctx.fillStyle = '#ca8a04'
+    ctx.fillRect(cw / 2 - 12, 0, 24, ch)
+    ctx.fillStyle = '#ef4444'
+    for (let y = 20; y < ch; y += 40) {
+      ctx.beginPath()
+      ctx.arc(cw / 2, y, 6, 0, Math.PI * 2)
+      ctx.fill()
+    }
+
+    const gapX = 28, gapY = 18, marginX = 40, marginY = 40
+    const cellW = (cw - marginX * 2 - gapX) / 2
+    const cellH = (ch - marginY * 2 - gapY * 3 - 60) / 4
+
+    imgs.slice(0, 8).forEach((img, i) => {
+      const col = i % 2, row = Math.floor(i / 2)
+      const px = marginX + col * (cellW + gapX)
+      const py = marginY + row * (cellH + gapY)
+
+      ctx.drawImage(img, px, py, cellW, cellH)
+      ctx.strokeStyle = '#ca8a04'
+      ctx.lineWidth = 2
+      ctx.strokeRect(px, py, cellW, cellH)
+    })
+
+    ctx.fillStyle = '#854d0e'
+    ctx.font = 'bold 18px serif'
+    ctx.textAlign = 'center'
+    ctx.fillText('BATIK NUSANTARA • FRAMERIO HERITAGE', cw / 2, ch - 20)
+    return canvas.toDataURL('image/jpeg', 0.95)
+  }
+
+  // ── Style: KK STUDIO DENIM STARS 4R (8 FOTO) ──────────────
+  if (tpl.styleType === 'denim-stars') {
+    const cw = 860, ch = 1140
+    canvas.width = cw; canvas.height = ch
+
+    // Dark Blue Denim Background
+    ctx.fillStyle = '#1e3a5f'
+    ctx.fillRect(0, 0, cw, ch)
+
+    // Jahitan Renda Putih Vertikal di Tengah & Sisi
+    ctx.fillStyle = '#ffffff'
+    for (let y = 0; y < ch; y += 30) {
+      ctx.fillRect(cw / 2 - 8, y, 16, 16)
+    }
+
+    const gapX = 36, gapY = 20, marginX = 44, marginY = 50
+    const cellW = (cw - marginX * 2 - gapX) / 2
+    const cellH = (ch - marginY * 2 - gapY * 3 - 60) / 4
+
+    imgs.slice(0, 8).forEach((img, i) => {
+      const col = i % 2, row = Math.floor(i / 2)
+      const px = marginX + col * (cellW + gapX)
+      const py = marginY + row * (cellH + gapY)
+
+      // Frame Bintang Emas Berkelip
+      ctx.fillStyle = '#fef08a'
+      ctx.fillRect(px - 6, py - 6, cellW + 12, cellH + 12)
+      ctx.drawImage(img, px, py, cellW, cellH)
+
+      // Bintang di 4 Sudut
+      ctx.font = '14px sans-serif'
+      ctx.fillText('✦', px - 12, py)
+      ctx.fillText('✦', px + cellW + 4, py)
+    })
+
+    ctx.fillStyle = '#fef08a'
+    ctx.font = 'bold 20px serif'
+    ctx.textAlign = 'center'
+    ctx.fillText('★ KK STUDIO 4R • DENIM STARS ★', cw / 2, ch - 22)
+    return canvas.toDataURL('image/jpeg', 0.95)
+  }
+
+  // ── Style: CUSTOM DYNAMIC TEMPLATE ─────────────────────────
+  if (tpl.styleType === 'custom' || tpl.isCustom) {
+    const count = tpl.photosCount || 4
+    let cw = 480, ch = 1200
+    if (count === 6) { cw = 600; ch = 900 }
+    else if (count === 8) { cw = 600; ch = 1100 }
+    else if (count === 2) { cw = 480; ch = 760 }
+    else if (count === 3) { cw = 480; ch = 980 }
+    else { cw = 480; ch = 1220 }
+
+    canvas.width = cw; canvas.height = ch
+    ctx.fillStyle = tpl.bg || '#ffffff'
+    ctx.fillRect(0, 0, cw, ch)
+
+    // Render Gambar Template dari Perangkat jika ada
+    if (tpl.bgImage) {
+      try {
+        const bgImg = await new Promise<HTMLImageElement>((resolve, reject) => {
+          const img = new Image()
+          img.onload = () => resolve(img)
+          img.onerror = reject
+          img.src = tpl.bgImage!
+        })
+        ctx.drawImage(bgImg, 0, 0, cw, ch)
+      } catch (err) {
+        console.warn('Gagal memuat template gambar background perangkat', err)
+      }
+    }
+
+    const labelH = 80
+    const margin = Math.max(tpl.pad || 16, 16)
+    const gapSize = tpl.gap || 12
+    const radius = tpl.rounded || 12
+
+    if (count > 4) {
+      const cols = 2
+      const rows = Math.ceil(count / cols)
+      const cellW = (cw - margin * 2 - gapSize * (cols - 1)) / cols
+      const cellH = (ch - margin * 2 - labelH - gapSize * (rows - 1)) / rows
+
+      imgs.slice(0, count).forEach((img, i) => {
+        const col = i % cols, row = Math.floor(i / cols)
+        const px = margin + col * (cellW + gapSize)
+        const py = margin + row * (cellH + gapSize)
+
+        ctx.save()
+        ctx.beginPath()
+        ctx.roundRect(px, py, cellW, cellH, radius)
+        ctx.clip()
+        ctx.drawImage(img, px, py, cellW, cellH)
+        ctx.restore()
+
+        if (tpl.frameWidth && tpl.frameWidth > 0) {
+          ctx.strokeStyle = tpl.frame || '#000'
+          ctx.lineWidth = tpl.frameWidth
+          ctx.beginPath()
+          ctx.roundRect(px, py, cellW, cellH, radius)
+          ctx.stroke()
+        }
+      })
+    } else {
+      const cellW = cw - margin * 2
+      const cellH = (ch - margin * 2 - labelH - gapSize * (count - 1)) / count
+
+      imgs.slice(0, count).forEach((img, i) => {
+        const py = margin + i * (cellH + gapSize)
+
+        ctx.save()
+        ctx.beginPath()
+        ctx.roundRect(margin, py, cellW, cellH, radius)
+        ctx.clip()
+        ctx.drawImage(img, margin, py, cellW, cellH)
+        ctx.restore()
+
+        if (tpl.frameWidth && tpl.frameWidth > 0) {
+          ctx.strokeStyle = tpl.frame || '#000'
+          ctx.lineWidth = tpl.frameWidth
+          ctx.beginPath()
+          ctx.roundRect(margin, py, cellW, cellH, radius)
+          ctx.stroke()
+        }
+      })
+    }
+
+    // Label & Subtext
+    ctx.fillStyle = tpl.textColor || '#111827'
+    ctx.font = 'bold 22px sans-serif'
+    ctx.textAlign = 'center'
+    ctx.fillText(tpl.labelText || 'Framerio Memories', cw / 2, ch - 42)
+    if (tpl.subText) {
+      ctx.font = '12px sans-serif'
+      ctx.fillText(tpl.subText, cw / 2, ch - 22)
+    }
+
+    return canvas.toDataURL('image/jpeg', 0.95)
+  }
+
+  // ── Style Standar: COUPLE & LAINNYA ───────────────────────
+  const cw = 480, count = 4, photoH = 320, LABEL_H = 70
+  const ch = fw * 2 + pad * 2 + count * photoH + (count - 1) * gap + LABEL_H
+  canvas.width = cw; canvas.height = ch
+  ctx.fillStyle = tpl.bg
+  ctx.fillRect(0, 0, cw, ch)
+
+  imgs.slice(0, count).forEach((img, i) => {
+    const iy = fw + pad + i * (photoH + gap)
+    ctx.drawImage(img, fw + pad, iy, cw - (fw + pad) * 2, photoH)
+  })
+
+  ctx.fillStyle = tpl.textColor
+  ctx.font = 'bold 18px sans-serif'
+  ctx.textAlign = 'center'
+  ctx.fillText(tpl.labelText, cw / 2, ch - 25)
 
   return canvas.toDataURL('image/jpeg', 0.95)
 }
 
 /* ════════════════════════════════════════════════════════════
-   COLLAGE CSS PREVIEW
+   COLLAGE CSS PREVIEW (MENAMPILKAN STYLE SEPERTI DI GAMBAR)
 ════════════════════════════════════════════════════════════ */
-function CollagePreview({ shots, layout, tpl, size = 'md' }: {
-  shots: string[]; layout: Layout; tpl: Template; size?: 'sm' | 'md'
+function CollagePreview({ shots, tpl, size = 'md' }: {
+  shots: string[]; tpl: Template; size?: 'sm' | 'md'
 }) {
-  const count = LAYOUTS.find(l => l.id === layout)!.count
+  const count = tpl.photosCount || 4
   const imgs = shots.slice(0, count)
-  const pad = size === 'sm' ? 5 : 10
-  const gap = size === 'sm' ? 2 : 5
-  const fw = size === 'sm' ? Math.min(4, tpl.frameWidth / 4) : Math.min(8, tpl.frameWidth / 2)
-  const rx = size === 'sm' ? Math.min(6, tpl.rounded / 2) : Math.min(12, tpl.rounded)
 
-  const bg = tpl.bg.startsWith('linear-gradient')
-    ? 'linear-gradient(135deg,#fce4f3,#e8eaff,#d4f5e9)'
-    : tpl.bg
-
-  const outer: React.CSSProperties = {
-    background: bg,
-    border: `${fw}px solid ${tpl.frame}`,
-    borderRadius: rx + fw,
-    padding: pad,
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 3,
+  // ── Pratinjau TIKET KONSER ──
+  if (tpl.styleType === 'ticket') {
+    return (
+      <div className="w-full bg-[#fcf8f2] border-4 border-[#7f1d1d] rounded-2xl p-2 flex flex-col gap-1.5 shadow-md">
+        <div className="text-center border-b border-[#7f1d1d] pb-1">
+          <div className="text-[9px] font-serif font-black text-[#7f1d1d]">Solo is Solo</div>
+          <div className="text-[6px] font-mono font-bold text-[#7f1d1d]">ROW B2 • SHOW 02</div>
+        </div>
+        <div className="flex flex-col gap-1 flex-1">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="aspect-[4/3] bg-zinc-200 rounded border border-[#7f1d1d] overflow-hidden">
+              {imgs[i] ? <img src={imgs[i]} className="w-full h-full object-cover" /> : null}
+            </div>
+          ))}
+        </div>
+        <div className="text-center text-[6px] font-mono text-[#7f1d1d] pt-1">JUST MOMENT</div>
+      </div>
+    )
   }
 
-  const ph: React.CSSProperties = { objectFit: 'cover', width: '100%', height: '100%', filter: tpl.filter, borderRadius: rx }
-  const empty: React.CSSProperties = { ...ph, background: '#ddd', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, color: '#aaa' }
-  const label: React.CSSProperties = { color: tpl.textColor, fontSize: size === 'sm' ? 7 : 9, fontWeight: 700, textAlign: 'center', fontFamily: 'monospace', letterSpacing: '0.08em', paddingTop: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }
-
-  function cell(i: number, style?: React.CSSProperties) {
-    return imgs[i]
-      ? <img key={i} src={imgs[i]} alt="" style={{ ...ph, ...style }} />
-      : <div key={i} style={{ ...empty, ...style }}>{i + 1}</div>
+  // ── Pratinjau SNOOPY ──
+  if (tpl.styleType === 'snoopy') {
+    return (
+      <div className="w-full bg-white border-2 border-slate-700 rounded-2xl p-2 flex flex-col gap-1.5 shadow-md">
+        <div className="text-center text-[8px] font-bold text-slate-800">☁️ SNOOPY & MIFFY</div>
+        <div className="flex flex-col gap-1 flex-1">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="aspect-[4/3] bg-zinc-100 rounded-lg border-2 border-slate-700 overflow-hidden">
+              {imgs[i] ? <img src={imgs[i]} className="w-full h-full object-cover" /> : null}
+            </div>
+          ))}
+        </div>
+        <div className="text-center text-[7px] text-slate-600 font-bold">⛵ 🐶 🐰 DREAMING</div>
+      </div>
+    )
   }
 
-  let grid: React.ReactNode
-  if (layout === 'strip4' || layout === 'strip2') {
-    const c = layout === 'strip4' ? 4 : 2
-    grid = <div style={{ display: 'flex', flexDirection: 'column', gap, flex: 1 }}>
-      {Array.from({ length: c }).map((_, i) => (
-        <div key={i} style={{ flex: 1, overflow: 'hidden', borderRadius: rx, background: '#ddd', minHeight: size === 'sm' ? 22 : 36 }}>
-          {cell(i)}
+  // ── Pratinjau POLKADOT COKLAT ──
+  if (tpl.styleType === 'polkadot-brown') {
+    return (
+      <div className="w-full bg-[#2b1810] rounded-2xl p-2 flex flex-col gap-1 shadow-md relative overflow-hidden">
+        {/* Dots */}
+        <div className="absolute top-1 left-1 w-6 h-6 rounded-full bg-[#bae6fd] opacity-80" />
+        <div className="absolute bottom-1 right-1 w-6 h-6 rounded-full bg-[#bae6fd] opacity-80" />
+        <div className="grid grid-cols-2 gap-1.5 z-10 flex-1">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="aspect-[4/3] bg-zinc-200 rounded-lg border-2 border-white overflow-hidden">
+              {imgs[i] ? <img src={imgs[i]} className="w-full h-full object-cover" /> : null}
+            </div>
+          ))}
         </div>
-      ))}
-    </div>
-  } else if (layout === 'grid4') {
-    grid = <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap, flex: 1 }}>
-      {Array.from({ length: 4 }).map((_, i) => (
-        <div key={i} style={{ overflow: 'hidden', borderRadius: rx, background: '#ddd', aspectRatio: '1' }}>
-          {cell(i)}
-        </div>
-      ))}
-    </div>
-  } else if (layout === 'wide2') {
-    grid = <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap, flex: 1 }}>
-      {Array.from({ length: 2 }).map((_, i) => (
-        <div key={i} style={{ overflow: 'hidden', borderRadius: rx, background: '#ddd', aspectRatio: '3/4' }}>
-          {cell(i)}
-        </div>
-      ))}
-    </div>
-  } else {
-    grid = <div style={{ flex: 1, overflow: 'hidden', borderRadius: rx, background: '#ddd', aspectRatio: '1' }}>
-      {cell(0)}
-    </div>
+        <div className="text-center text-[7px] font-bold text-[#bae6fd] pt-1 z-10">framerio safari</div>
+      </div>
+    )
   }
 
+  // ── Pratinjau POLKADOT BLUE LACE ──
+  if (tpl.styleType === 'polkadot-blue-lace') {
+    return (
+      <div className="w-full bg-[#1e293b] rounded-2xl p-2 pl-3 flex flex-col gap-1 shadow-md relative border-l-4 border-dashed border-white/60">
+        <div className="grid grid-cols-2 gap-1.5 z-10 flex-1">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="aspect-[4/3] bg-zinc-200 rounded-lg border border-white overflow-hidden">
+              {imgs[i] ? <img src={imgs[i]} className="w-full h-full object-cover" /> : null}
+            </div>
+          ))}
+        </div>
+        <div className="text-center text-[7px] font-bold text-white pt-1">safari blue lace</div>
+      </div>
+    )
+  }
+
+  // ── Pratinjau KORAN "FOTO KITA BLUR" ──
+  if (tpl.styleType === 'newspaper-blur') {
+    return (
+      <div className="w-full bg-[#fafaf9] border-2 border-stone-800 rounded-xl p-2 flex flex-col gap-1 shadow-md">
+        <div className="text-center text-[6px] font-serif border-b border-stone-700 pb-0.5">NEWS PHOTOBOOTH</div>
+        <div className="text-center text-[10px] font-black text-red-700 leading-none">FOTO KITA BLUR</div>
+        <div className="aspect-[16/10] bg-zinc-200 border border-stone-800 rounded overflow-hidden">
+          {imgs[0] ? <img src={imgs[0]} className="w-full h-full object-cover" /> : null}
+        </div>
+        <div className="flex gap-1 items-center mt-0.5">
+          <div className="w-9 h-9 bg-zinc-200 border border-stone-800 rounded flex-shrink-0 overflow-hidden">
+            {imgs[1] ? <img src={imgs[1]} className="w-full h-full object-cover" /> : null}
+          </div>
+          <div className="text-[5px] text-stone-700 leading-tight">
+            <strong>BLUEBERRY & PASTRY</strong><br/>Tak banyak yang kulihat...
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // ── Pratinjau BATIK / DENIM (8 FOTO) ──
+  if (tpl.styleType === 'batik' || tpl.styleType === 'denim-stars') {
+    const isDenim = tpl.styleType === 'denim-stars'
+    return (
+      <div className={`w-full rounded-2xl p-1.5 flex flex-col gap-1 shadow-md ${isDenim ? 'bg-[#1e3a5f]' : 'bg-[#fbf7ee] border-2 border-[#ca8a04]'}`}>
+        <div className="grid grid-cols-2 gap-1 flex-1">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div key={i} className={`aspect-[4/3] rounded overflow-hidden ${isDenim ? 'border border-[#fef08a] bg-zinc-200' : 'border border-[#ca8a04] bg-zinc-100'}`}>
+              {imgs[i] ? <img src={imgs[i]} className="w-full h-full object-cover" /> : null}
+            </div>
+          ))}
+        </div>
+        <div className={`text-center text-[6px] font-bold ${isDenim ? 'text-[#fef08a]' : 'text-[#854d0e]'}`}>
+          {isDenim ? '★ KK STUDIO 4R ★' : 'BATIK NUSANTARA'}
+        </div>
+      </div>
+    )
+  }
+
+  // ── Pratinjau CUSTOM / DYNAMIC TEMPLATE ──
+  if (tpl.styleType === 'custom' || tpl.isCustom) {
+    const count = tpl.photosCount || 4
+    return (
+      <div
+        className="w-full rounded-2xl p-2 flex flex-col gap-1 shadow-sm border relative overflow-hidden bg-cover bg-center"
+        style={{
+          backgroundColor: tpl.bg || '#ffffff',
+          backgroundImage: tpl.bgImage ? `url(${tpl.bgImage})` : undefined,
+          borderColor: tpl.frame || '#e5e7eb',
+          borderWidth: `${Math.min(tpl.frameWidth || 1, 4)}px`
+        }}
+      >
+        <div
+          className={`grid gap-1 flex-1 relative z-10 ${
+            count > 4 ? 'grid-cols-2' : count === 3 ? 'grid-cols-1' : count === 2 ? 'grid-cols-1' : 'grid-cols-1'
+          }`}
+        >
+          {Array.from({ length: Math.min(count, 8) }).map((_, i) => (
+            <div
+              key={i}
+              className="aspect-[4/3] bg-zinc-200/90 overflow-hidden shadow-sm"
+              style={{
+                borderRadius: `${Math.min(tpl.rounded || 6, 12)}px`,
+                borderColor: tpl.frame || 'transparent',
+                borderWidth: tpl.frameWidth ? '1px' : '0'
+              }}
+            >
+              {imgs[i] ? <img src={imgs[i]} className="w-full h-full object-cover" /> : null}
+            </div>
+          ))}
+        </div>
+        <div className="text-center pt-1 truncate relative z-10 bg-white/40 backdrop-blur-[2px] rounded-lg mt-0.5 px-1">
+          <p className="text-[7px] font-bold truncate leading-tight" style={{ color: tpl.textColor || '#000' }}>
+            {tpl.labelText || 'Custom'}
+          </p>
+          {tpl.subText && (
+            <p className="text-[5px] uppercase opacity-75 truncate" style={{ color: tpl.textColor || '#000' }}>
+              {tpl.subText}
+            </p>
+          )}
+        </div>
+      </div>
+    )
+  }
+
+  // Default Standard Preview
   return (
-    <div style={outer}>
-      {grid}
-      <div style={label}>{tpl.labelText}</div>
+    <div className="w-full bg-white rounded-2xl p-2 flex flex-col gap-1 border shadow-sm">
+      <div className="flex flex-col gap-1 flex-1">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} className="aspect-[4/3] bg-zinc-200 rounded overflow-hidden">
+            {imgs[i] ? <img src={imgs[i]} className="w-full h-full object-cover" /> : null}
+          </div>
+        ))}
+      </div>
+      <div className="text-center text-[7px] font-bold text-zinc-700">{tpl.labelText}</div>
     </div>
   )
-}
-
-/* ════════════════════════════════════════════════════════════
-   LAYOUT SVG THUMB
-════════════════════════════════════════════════════════════ */
-function LayoutThumb({ id, active }: { id: Layout; active: boolean }) {
-  const c = active ? '#e85200' : '#9ca3af'
-  if (id === 'strip4') return <svg width={22} height={28} viewBox="0 0 22 28"><rect x={1} y={1} width={20} height={5} rx={1} fill={c}/><rect x={1} y={8} width={20} height={5} rx={1} fill={c}/><rect x={1} y={15} width={20} height={5} rx={1} fill={c}/><rect x={1} y={22} width={20} height={5} rx={1} fill={c}/></svg>
-  if (id === 'strip2') return <svg width={22} height={28} viewBox="0 0 22 28"><rect x={1} y={4} width={20} height={9} rx={1} fill={c}/><rect x={1} y={15} width={20} height={9} rx={1} fill={c}/></svg>
-  if (id === 'grid4')  return <svg width={26} height={26} viewBox="0 0 26 26"><rect x={1} y={1} width={11} height={11} rx={1} fill={c}/><rect x={14} y={1} width={11} height={11} rx={1} fill={c}/><rect x={1} y={14} width={11} height={11} rx={1} fill={c}/><rect x={14} y={14} width={11} height={11} rx={1} fill={c}/></svg>
-  if (id === 'wide2')  return <svg width={28} height={20} viewBox="0 0 28 20"><rect x={1} y={1} width={12} height={18} rx={1} fill={c}/><rect x={15} y={1} width={12} height={18} rx={1} fill={c}/></svg>
-  return <svg width={24} height={24} viewBox="0 0 24 24"><rect x={2} y={2} width={20} height={20} rx={2} fill={c}/></svg>
 }
 
 /* ════════════════════════════════════════════════════════════
@@ -356,8 +933,9 @@ export default function Photobooth({ allowed }: { allowed: boolean }) {
 
   const [facing,    setFacing]    = useState<'user' | 'environment'>('user')
   const [ready,     setReady]     = useState(false)
-  const [layout,    setLayout]    = useState<Layout>('strip4')
-  const [template,  setTemplate]  = useState<Template>(TEMPLATES[1]) // Korean Film default
+  const [template,  setTemplate]  = useState<Template>(TEMPLATES[0]) // Snoopy default
+  const [layout,    setLayout]    = useState<Layout | string>(TEMPLATES[0].recommendedLayout)
+  const [activeTab, setActiveTab] = useState<Category | string>('Semua')
   const [shots,     setShots]     = useState<string[]>([])
   const [capturing, setCapturing] = useState(false)
   const [countdown, setCountdown] = useState<number | null>(null)
@@ -367,306 +945,513 @@ export default function Photobooth({ allowed }: { allowed: boolean }) {
   const [error,     setError]     = useState<string | null>(null)
   const [step,      setStep]      = useState<'shoot' | 'result'>('shoot')
 
-  const layoutDef = LAYOUTS.find(l => l.id === layout)!
+  // Custom Templates & User Permissions
+  const [customTemplates, setCustomTemplates] = useState<Template[]>([])
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [userAccess, setUserAccess] = useState<{
+    authenticated: boolean
+    canCreateTemplate: boolean
+    isAdmin: boolean
+    isTrialActive: boolean
+    hasActiveSub: boolean
+  }>({
+    authenticated: false,
+    canCreateTemplate: false,
+    isAdmin: false,
+    isTrialActive: false,
+    hasActiveSub: false
+  })
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false)
 
-  /* ── camera ── */
+  // Fetch User Access & Custom Templates
+  useEffect(() => {
+    async function initData() {
+      try {
+        const [accRes, tplRes] = await Promise.all([
+          fetch('/api/user/access'),
+          fetch('/api/templates')
+        ])
+        const accData = await accRes.json()
+        if (accData) setUserAccess(accData)
+
+        const tplData = await tplRes.json()
+        if (tplData.success && tplData.templates) {
+          const mapped: Template[] = tplData.templates.map((t: any) => ({
+            id: t.id,
+            name: t.name,
+            category: t.category,
+            tag: t.tag,
+            tagColor: t.tagColor,
+            usesCount: t.usesCount || '0 uses',
+            photosCount: t.photosCount || 4,
+            recommendedLayout: t.recommendedLayout || 'strip4',
+            bg: t.bg,
+            frame: t.frame,
+            frameWidth: t.frameWidth,
+            rounded: t.rounded,
+            gap: t.gap,
+            pad: t.pad,
+            textColor: t.textColor,
+            labelText: t.labelText,
+            subText: t.subText,
+            filter: t.filter,
+            styleType: 'custom',
+            bgImage: t.bgImage,
+            isCustom: true,
+            isPublic: t.isPublic
+          }))
+          setCustomTemplates(mapped)
+        }
+      } catch (e) {
+        console.error('Failed to init photobooth templates data', e)
+      }
+    }
+    initData()
+  }, [])
+
+  const allTemplates = [...TEMPLATES, ...customTemplates]
+  const targetPhotoCount = template.photosCount || 4
+
+  const filteredTemplates = activeTab === 'Semua' 
+    ? allTemplates 
+    : allTemplates.filter(t => t.category === activeTab)
+
+  const handleOpenCreateModal = () => {
+    if (!userAccess.authenticated) {
+      window.location.href = '/login'
+      return
+    }
+    if (!userAccess.canCreateTemplate) {
+      setShowUpgradeModal(true)
+      return
+    }
+    setIsModalOpen(true)
+  }
+
+  const handleTemplateCreated = (newTpl: any) => {
+    const formatted: Template = {
+      id: newTpl.id,
+      name: newTpl.name,
+      category: newTpl.category,
+      tag: newTpl.tag,
+      tagColor: newTpl.tagColor,
+      usesCount: newTpl.usesCount || '1 uses',
+      photosCount: newTpl.photosCount || 4,
+      recommendedLayout: newTpl.recommendedLayout || 'strip4',
+      bg: newTpl.bg,
+      frame: newTpl.frame,
+      frameWidth: newTpl.frameWidth,
+      rounded: newTpl.rounded,
+      gap: newTpl.gap,
+      pad: newTpl.pad,
+      textColor: newTpl.textColor,
+      labelText: newTpl.labelText,
+      subText: newTpl.subText,
+      filter: newTpl.filter,
+      styleType: 'custom',
+      bgImage: newTpl.bgImage,
+      isCustom: true,
+      isPublic: newTpl.isPublic
+    }
+    setCustomTemplates(prev => [formatted, ...prev])
+    selectTemplate(formatted)
+  }
+
   async function startCamera() {
     try {
       streamRef.current?.getTracks().forEach(t => t.stop())
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { facingMode: facing, width: { ideal: 1280 }, height: { ideal: 720 } },
-        audio: false,
+        audio: false
       })
       streamRef.current = stream
-      if (videoRef.current) { videoRef.current.srcObject = stream; await videoRef.current.play() }
-      setReady(true); setError(null)
-    } catch (e: any) { setError('Tidak bisa akses kamera: ' + (e?.message || e)) }
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream
+        await videoRef.current.play()
+      }
+      setReady(true)
+      setError(null)
+    } catch (e: any) {
+      setError('Tidak bisa akses kamera: ' + (e?.message || e))
+    }
   }
 
   useEffect(() => {
-    if (allowed && step === 'shoot') startCamera()
+    if (allowed) startCamera()
     return () => streamRef.current?.getTracks().forEach(t => t.stop())
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [facing, allowed, step])
+  }, [facing, allowed])
 
-  function captureFrame() {
-    const v = videoRef.current!
-    const c = document.createElement('canvas')
-    c.width = v.videoWidth; c.height = v.videoHeight
-    const ctx = c.getContext('2d')!
-    if (facing === 'user') { ctx.translate(c.width, 0); ctx.scale(-1, 1) }
-    ctx.drawImage(v, 0, 0)
-    return c.toDataURL('image/jpeg', 0.9)
+  function captureFrame(): string {
+    const video = videoRef.current!
+    const canvas = document.createElement('canvas')
+    canvas.width = video.videoWidth || 1280
+    canvas.height = video.videoHeight || 720
+    const ctx = canvas.getContext('2d')!
+    if (facing === 'user') {
+      ctx.translate(canvas.width, 0)
+      ctx.scale(-1, 1)
+    }
+    ctx.drawImage(video, 0, 0)
+    return canvas.toDataURL('image/jpeg', 0.92)
   }
 
   const sleep = (ms: number) => new Promise(r => setTimeout(r, ms))
 
   async function runCapture() {
     if (!videoRef.current || !ready || capturing) return
-    setCapturing(true); setShots([])
+    setCapturing(true)
+    setShots([])
+    const total = targetPhotoCount
     const collected: string[] = []
-    for (let i = 0; i < layoutDef.count; i++) {
-      for (let c = 5; c >= 1; c--) { setCountdown(c); await sleep(1000) }
+
+    for (let i = 0; i < total; i++) {
+      for (let c = 5; c >= 1; c--) {
+        setCountdown(c)
+        await sleep(1000)
+      }
       setCountdown(null)
       collected.push(captureFrame())
       setShots([...collected])
       await sleep(500)
     }
+
+    const composed = await composeLayout(collected, layout, template)
+    setResult(composed)
+    setSaved(false)
     setCapturing(false)
+    setStep('result')
   }
 
-  async function handleGenerate() {
-    const composed = await composeCollage(shots, layout, template)
-    setResult(composed); setSaved(false); setStep('result')
+  async function selectTemplate(newTpl: Template) {
+    setTemplate(newTpl)
+    setLayout(newTpl.recommendedLayout)
+    setShots([])
+    setResult(null)
   }
 
   function handlePrint() {
     if (!result) return
     const win = window.open('', '_blank')
-    if (!win) { alert('Popup diblokir.'); return }
-    win.document.write(`<!doctype html><html><head><title>Print</title><style>@page{margin:0}body{margin:0;display:flex;align-items:center;justify-content:center;min-height:100vh;background:#fff}img{max-width:100%;max-height:100vh}</style></head><body><img src="${result}" onload="window.print();setTimeout(()=>window.close(),500);"/></body></html>`)
+    if (!win) { alert('Izinkan popup browser untuk mencetak foto'); return }
+    win.document.write(`<!doctype html><html><head><title>Print Framerio</title>
+      <style>
+        @page { margin: 0; }
+        body { margin: 0; display: flex; align-items: center; justify-content: center; min-height: 100vh; background: #fff; }
+        img { max-width: 100%; max-height: 100vh; }
+      </style>
+      </head><body>
+      <img src="${result}" onload="window.print(); setTimeout(()=>window.close(), 500);" />
+      </body></html>`)
     win.document.close()
   }
 
   function handleDownload() {
     if (!result) return
-    const a = document.createElement('a'); a.href = result; a.download = `framerio-${Date.now()}.jpg`; a.click()
+    const a = document.createElement('a')
+    a.href = result
+    a.download = `framerio-${template.id}-${Date.now()}.jpg`
+    a.click()
   }
 
   async function handleSave() {
     if (!result || saved) return
     setSaving(true)
     try {
-      const res = await fetch('/api/photos', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ imageData: result, layout }) })
-      if (!res.ok) throw new Error((await res.json()).error || 'Gagal menyimpan')
+      const res = await fetch('/api/photos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ imageData: result, layout })
+      })
+      if (!res.ok) throw new Error((await res.json()).error || 'Gagal menyimpan foto')
       setSaved(true)
-    } catch (e: any) { setError(e.message) } finally { setSaving(false) }
+    } catch (e: any) {
+      setError(e.message)
+    } finally {
+      setSaving(false)
+    }
   }
 
-  function reset() { setShots([]); setResult(null); setSaved(false); setStep('shoot'); setError(null) }
-
-  /* ── access denied ── */
-  if (!allowed) return (
-    <div className="w-full max-w-md mx-auto px-4 py-16 text-center">
-      <div className="retro-canvas retro-grid-bg rounded-[32px] border-2 border-white/60 p-10">
-        <div className="w-14 h-14 mx-auto rounded-2xl bg-[#e85200]/10 border border-[#e85200]/20 flex items-center justify-center font-black text-[#e85200] text-xl mb-5">✕</div>
-        <h2 className="text-xl font-black text-zinc-900 mb-2">Masa Akses Berakhir</h2>
-        <p className="text-xs text-zinc-500 mb-7 leading-relaxed">Pilih paket langganan untuk melanjutkan penggunaan studio.</p>
-        <a href="/pricing" className="inline-flex items-center gap-2 btn-orange-glow px-7 py-3.5 rounded-full text-white font-extrabold text-xs tracking-wider uppercase hover:scale-105 transition-transform">
-          Lihat Paket Harga →
+  if (!allowed) {
+    return (
+      <div className="max-w-md mx-auto p-8 text-center bg-[#e4e3de] rounded-[36px] border-4 border-white shadow-xl my-12">
+        <h2 className="text-2xl font-black text-zinc-900 mb-2 uppercase">Masa Akses Selesai</h2>
+        <p className="text-zinc-600 mb-6 text-sm font-medium">Silakan berlangganan untuk menikmati studio photobooth tanpa batas.</p>
+        <a href="/pricing" className="inline-block px-8 py-3.5 rounded-full btn-orange-glow text-white font-black text-xs tracking-wider uppercase shadow-md">
+          Lihat Paket Langganan
         </a>
       </div>
-    </div>
-  )
+    )
+  }
 
-  /* ══════════════════════════════════════════════════════════
-     SHOOT STEP  — 3-column layout
-     Left: camera  |  Center: collage preview  |  Right: templates
-  ══════════════════════════════════════════════════════════ */
-  if (step === 'shoot') return (
-    <div className="w-full px-3 sm:px-5 py-4 space-y-3">
+  return (
+    <div className="w-full px-3 sm:px-5 py-4 space-y-4">
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-2xl text-xs font-semibold flex items-center justify-between">
-          {error}<button onClick={() => setError(null)} className="ml-3 font-black">✕</button>
+          {error}
+          <button onClick={() => setError(null)} className="ml-3 font-black">✕</button>
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_220px_280px] gap-3 items-start">
-
-        {/* ── COL 1: Camera ───────────────────────────────── */}
-        <div className="retro-canvas rounded-[24px] border-2 border-white/60 p-3.5 shadow-md">
-          <div className="flex items-center justify-between mb-2 px-0.5">
-            <span className="text-[9px] font-mono tracking-widest text-zinc-500 uppercase">Kamera</span>
-            <div className="flex items-center gap-3">
-              {/* Layout picker inline */}
-              <div className="flex gap-1">
-                {LAYOUTS.map(l => (
-                  <button key={l.id} onClick={() => { setLayout(l.id); setShots([]) }} title={l.name}
-                    className={`p-1.5 rounded-lg transition-all ${layout === l.id ? 'bg-[#e85200]/15 ring-1 ring-[#e85200]' : 'hover:bg-white/60'}`}>
-                    <LayoutThumb id={l.id} active={layout === l.id} />
-                  </button>
-                ))}
+      {step === 'shoot' ? (
+        <div className="space-y-4">
+          {/* ── TOP SECTION: Camera & Main Live Preview ─────────────── */}
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_260px] gap-3 items-start">
+            {/* Camera Viewfinder */}
+            <div className="retro-canvas rounded-[24px] border-2 border-white/60 p-3.5 shadow-md">
+              <div className="flex items-center justify-between mb-2 px-0.5">
+                <span className="text-[11px] font-mono tracking-wider text-zinc-700 font-bold uppercase">
+                  Template Aktif: <strong className="text-[#e85200]">{template.name}</strong>
+                </span>
+                <span className="text-[11px] font-mono font-bold text-[#e85200] bg-white/70 px-2.5 py-0.5 rounded-full border border-white">
+                  Pose {shots.length}/{targetPhotoCount}
+                </span>
               </div>
-              <span className="text-[10px] font-semibold text-zinc-400">{shots.length}/{layoutDef.count}</span>
-            </div>
-          </div>
 
-          {/* Viewfinder */}
-          <div className="relative rounded-xl overflow-hidden bg-zinc-900" style={{ aspectRatio: '4/3' }}>
-            <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
-            {countdown !== null && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-900/70 backdrop-blur-sm">
-                <span className="text-white font-black tabular-nums drop-shadow-2xl" style={{ fontSize: 'clamp(4rem,18vw,8rem)' }}>{countdown}</span>
-                <span className="text-[#e85200] text-[10px] font-bold tracking-widest mt-2 uppercase">Pose {shots.length + 1}/{layoutDef.count}</span>
+              {/* Viewfinder Video */}
+              <div className="relative rounded-xl overflow-hidden bg-zinc-900" style={{ aspectRatio: '4/3' }}>
+                <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
+                {countdown !== null && (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-900/70 backdrop-blur-sm">
+                    <span className="text-white font-black tabular-nums drop-shadow-2xl" style={{ fontSize: 'clamp(4rem,18vw,8rem)' }}>
+                      {countdown}
+                    </span>
+                    <span className="text-[#e85200] text-[11px] font-bold tracking-widest mt-2 uppercase">
+                      Pose {shots.length + 1}/{targetPhotoCount}
+                    </span>
+                  </div>
+                )}
+                {!ready && countdown === null && (
+                  <div className="absolute inset-0 flex items-center justify-center text-zinc-400 text-xs bg-zinc-900/90">
+                    Menghubungkan kamera...
+                  </div>
+                )}
+                {/* Progress Dots */}
+                <div className="absolute bottom-2.5 left-0 right-0 flex justify-center gap-1.5">
+                  {Array.from({ length: targetPhotoCount }).map((_, i) => (
+                    <div key={i} className={`w-2.5 h-2.5 rounded-full transition-all ${i < shots.length ? 'bg-[#e85200]' : 'bg-white/40'}`} />
+                  ))}
+                </div>
               </div>
-            )}
-            {!ready && countdown === null && (
-              <div className="absolute inset-0 flex items-center justify-center text-zinc-400 text-xs bg-zinc-900/90">Menghubungkan kamera...</div>
-            )}
-            {/* Progress dots */}
-            <div className="absolute bottom-2.5 left-0 right-0 flex justify-center gap-1.5">
-              {Array.from({ length: layoutDef.count }).map((_, i) => (
-                <div key={i} className={`w-2 h-2 rounded-full transition-all ${i < shots.length ? 'bg-[#e85200]' : 'bg-white/35'}`} />
-              ))}
-            </div>
-          </div>
 
-          {/* Controls */}
-          <div className="flex gap-2 mt-2.5 items-center">
-            <button onClick={() => setFacing(f => f === 'user' ? 'environment' : 'user')}
-              className="px-3.5 py-2 rounded-full text-xs font-bold bg-white/60 hover:bg-white border border-zinc-300 text-zinc-700 transition flex-shrink-0">
-              ↺ Balik
-            </button>
-            <button onClick={runCapture} disabled={capturing || !ready}
-              className="flex-1 btn-orange-glow py-2.5 rounded-full text-white font-extrabold text-xs tracking-wide uppercase transition-transform hover:scale-[1.02] active:scale-95 disabled:opacity-40 disabled:scale-100 disabled:cursor-not-allowed">
-              {capturing ? `Mengambil ${shots.length + 1}/${layoutDef.count}...` : 'Mulai Foto (5s)'}
-            </button>
-          </div>
-
-          {/* Shots strip */}
-          {shots.length > 0 && (
-            <div className="mt-3">
-              <div className="flex gap-1.5 flex-wrap">
-                {shots.map((s, i) => (
-                  <img key={i} src={s} alt="" className="h-14 w-auto rounded-lg border-2 border-white/80 object-cover shadow-sm" />
-                ))}
-                {Array.from({ length: layoutDef.count - shots.length }).map((_, i) => (
-                  <div key={i} className="h-14 w-20 rounded-lg border-2 border-dashed border-zinc-300/60 flex items-center justify-center text-[10px] text-zinc-300">{shots.length + i + 1}</div>
-                ))}
-              </div>
-              {shots.length === layoutDef.count && (
-                <button onClick={handleGenerate}
-                  className="mt-2.5 w-full btn-orange-glow py-2.5 rounded-full text-white font-extrabold text-xs uppercase tracking-wide hover:scale-[1.02] transition-transform shadow-md">
-                  Buat Kolase →
+              {/* Controls */}
+              <div className="flex gap-2 mt-2.5 items-center">
+                <button
+                  onClick={() => setFacing(f => f === 'user' ? 'environment' : 'user')}
+                  className="px-4 py-2.5 rounded-full text-xs font-bold bg-white/70 hover:bg-white border border-zinc-300 text-zinc-700 transition flex-shrink-0"
+                >
+                  ↺ Balik Kamera
                 </button>
-              )}
+                <button
+                  onClick={runCapture}
+                  disabled={capturing || !ready}
+                  className="flex-1 py-3 rounded-full btn-orange-glow text-white text-xs sm:text-sm font-black uppercase tracking-wider transition disabled:opacity-40"
+                >
+                  {capturing ? 'Sedang Foto...' : `Mulai Foto (${targetPhotoCount} Pose)`}
+                </button>
+              </div>
             </div>
-          )}
-        </div>
 
-        {/* ── COL 2: Live collage preview ─────────────────── */}
-        <div className="retro-canvas rounded-[24px] border-2 border-white/60 p-3.5 shadow-md flex flex-col">
-          <div className="text-[9px] font-mono tracking-widest text-zinc-500 uppercase mb-2">Pratinjau</div>
-          <div className="flex-1 flex items-center justify-center">
-            <CollagePreview shots={shots} layout={layout} tpl={template} size="md" />
-          </div>
-          <div className="mt-2.5 text-center">
-            <span className="text-[9px] font-bold text-zinc-400">{template.name}</span>
-          </div>
-        </div>
-
-        {/* ── COL 3: Template picker ───────────────────────── */}
-        <div className="retro-canvas rounded-[24px] border-2 border-white/60 p-3.5 shadow-md">
-          <div className="text-[9px] font-mono tracking-widest text-zinc-500 uppercase mb-2">
-            Template <span className="text-zinc-400">({TEMPLATES.length})</span>
-          </div>
-          <div className="grid grid-cols-5 gap-1.5 overflow-y-auto max-h-[520px] pr-0.5"
-            style={{ scrollbarWidth: 'thin', scrollbarColor: '#d1d5db transparent' }}>
-            {TEMPLATES.map(t => (
-              <button key={t.id} onClick={() => setTemplate(t)} title={t.name}
-                className={`relative flex flex-col items-center justify-end rounded-xl border-2 overflow-hidden transition-all group ${
-                  template.id === t.id
-                    ? 'border-[#e85200] shadow-md scale-[1.06] z-10'
-                    : 'border-transparent hover:border-zinc-300 hover:scale-[1.03]'
-                }`}
-                style={{ aspectRatio: '2/3' }}
-              >
-                {/* Mini collage as background */}
-                <div className="absolute inset-0 p-1" style={{ background: t.bg.startsWith('linear') ? 'linear-gradient(135deg,#fce4f3,#e8eaff,#d4f5e9)' : t.bg }}>
-                  <CollagePreview shots={shots} layout={layout} tpl={t} size="sm" />
+            {/* Live Center Collage Preview */}
+            <div className="retro-canvas rounded-[24px] border-2 border-white/60 p-3.5 shadow-md flex flex-col items-center">
+              <span className="text-[10px] font-mono tracking-widest text-zinc-500 uppercase font-bold mb-2">
+                Pratinjau ({template.name})
+              </span>
+              <div className="w-full flex justify-center">
+                <div className="w-full max-w-[210px]">
+                  <CollagePreview shots={shots} tpl={template} size="md" />
                 </div>
-                {/* Name overlay */}
-                <div className="relative z-10 w-full px-1 pb-1 pt-3"
-                  style={{ background: 'linear-gradient(to top,rgba(0,0,0,0.7) 0%,transparent 100%)' }}>
-                  <div className="text-[7px] font-bold text-white leading-tight text-center drop-shadow truncate">{t.name}</div>
+              </div>
+            </div>
+          </div>
+
+          {/* ── BOTTOM SECTION: KATALOG PERSIS SEPERTI GAMBAR 1 & 2 ── */}
+          <div className="bg-[#eceae4] rounded-[28px] border-2 border-white p-5 sm:p-7 shadow-md">
+            {/* Header Text */}
+            <div className="text-center mb-6">
+              <h2 className="text-xl sm:text-2xl font-black text-zinc-900 tracking-tight">
+                Pilih Template Kolase Favorit
+              </h2>
+              <p className="text-xs text-zinc-500 italic mt-0.5">
+                Koleksi template aesthetic Snoopy, Tiket Konser, Koran Foto Kita Blur, Batik & Polkadot
+              </p>
+
+              {/* Filter Tabs & Tombol Buat Template */}
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-4">
+                <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2">
+                  {(['Semua', 'Karakter & Kartun', 'Tiket & Majalah', 'Polkadot & Renda', 'Batik & Denim', 'Kustom'] as Category[]).map(tab => (
+                    <button
+                      key={tab}
+                      onClick={() => setActiveTab(tab)}
+                      className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${
+                        activeTab === tab
+                          ? 'bg-purple-600 text-white shadow-md shadow-purple-600/30'
+                          : 'bg-white/80 hover:bg-white text-zinc-700 border border-zinc-200'
+                      }`}
+                    >
+                      {tab}
+                    </button>
+                  ))}
                 </div>
-                {template.id === t.id && (
-                  <div className="absolute top-0.5 right-0.5 w-3.5 h-3.5 bg-[#e85200] rounded-full flex items-center justify-center text-[7px] text-white font-black z-20">✓</div>
-                )}
-              </button>
-            ))}
+
+                {/* Tombol Buat Template Sendiri */}
+                <button
+                  onClick={handleOpenCreateModal}
+                  className="px-4 py-2 rounded-full text-xs font-black bg-[#e85200] hover:bg-[#ff5d07] text-white shadow-md shadow-orange-500/20 transition-all flex items-center gap-1.5 transform hover:scale-105"
+                >
+                  <span>✨</span> + Buat Template Sendiri
+                </button>
+              </div>
+            </div>
+
+            {/* Kartu-Kartu Template Persis Gambar 1 & 2 */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 pt-1">
+              {filteredTemplates.map(t => {
+                const isSelected = template.id === t.id
+                return (
+                  <div
+                    key={t.id}
+                    onClick={() => selectTemplate(t)}
+                    className={`relative rounded-3xl p-3 border-2 transition-all duration-200 cursor-pointer flex flex-col justify-between group ${
+                      isSelected
+                        ? 'border-purple-600 ring-4 ring-purple-500/20 bg-white shadow-xl scale-[1.02]'
+                        : 'border-white/80 bg-white/70 hover:bg-white hover:border-purple-300 shadow-sm'
+                    }`}
+                  >
+                    {/* Top Badges (Free & Ad-free style) */}
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-purple-600 text-white shadow-sm">
+                        ✦ Free
+                      </span>
+                      <span className="text-[9px] font-semibold text-purple-600 bg-purple-100 px-2 py-0.5 rounded-full">
+                        Ad-free
+                      </span>
+                    </div>
+
+                    {/* Visual Collage Mini Preview */}
+                    <div className="w-full flex-1 flex items-center justify-center my-1 relative">
+                      <div className="w-full max-w-[130px]">
+                        <CollagePreview shots={[]} tpl={t} size="sm" />
+                      </div>
+
+                      {/* Hover Pill "Start Creating" */}
+                      <div className="absolute inset-0 bg-black/10 rounded-2xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        <span className="px-3 py-1 rounded-full bg-white text-zinc-900 text-[10px] font-black shadow-md flex items-center gap-1">
+                          📸 Pakai Template
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Bottom Info: Uses Count & Title */}
+                    <div className="mt-3 pt-2 border-t border-zinc-200/80">
+                      <div className="flex items-center gap-1 text-[9px] font-semibold text-zinc-500 mb-1">
+                        <span>👥</span>
+                        <span>{t.usesCount}</span>
+                      </div>
+                      <h4 className="text-xs font-bold text-zinc-900 truncate">
+                        {t.name}
+                      </h4>
+                      <p className="text-[10px] font-medium text-zinc-500 mt-0.5">
+                        📷 {t.photosCount} photos
+                      </p>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
           </div>
         </div>
-      </div>
-    </div>
-  )
+      ) : (
+        /* ── RESULT STEP ────────────────────────────────────────── */
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+          <div className="retro-canvas p-6 rounded-[32px] border-4 border-white flex items-center justify-center">
+            {result && (
+              <img
+                src={result}
+                alt="Hasil Photobooth"
+                className="max-h-[580px] rounded-2xl shadow-2xl border-4 border-white"
+              />
+            )}
+          </div>
+          <div className="space-y-3 bg-[#e4e3de] p-6 sm:p-8 rounded-[36px] border-4 border-white shadow-xl">
+            <h3 className="text-xl sm:text-2xl font-black text-zinc-900 uppercase">
+              Hasil Foto Selesai
+            </h3>
+            <p className="text-xs text-zinc-600 mb-6 font-medium">
+              Template: {template.name} &bull; {targetPhotoCount} Pose
+            </p>
 
-  /* ══════════════════════════════════════════════════════════
-     RESULT STEP
-  ══════════════════════════════════════════════════════════ */
-  return (
-    <div className="w-full px-3 sm:px-5 py-4">
-      {error && (
-        <div className="mb-3 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-2xl text-xs font-semibold flex items-center justify-between">
-          {error}<button onClick={() => setError(null)} className="ml-3 font-black">✕</button>
+            <button
+              onClick={handlePrint}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3.5 rounded-full font-bold text-xs uppercase tracking-wider shadow-md transition"
+            >
+              Cetak ke Printer
+            </button>
+            <button
+              onClick={handleDownload}
+              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3.5 rounded-full font-bold text-xs uppercase tracking-wider shadow-md transition"
+            >
+              Unduh Gambar (JPG)
+            </button>
+            <button
+              onClick={handleSave}
+              disabled={saving || saved}
+              className="w-full btn-orange-glow text-white py-3.5 rounded-full font-black text-xs uppercase tracking-wider shadow-md transition disabled:opacity-50"
+            >
+              {saved ? 'Tersimpan di Galeri' : saving ? 'Menyimpan...' : 'Simpan ke Galeri Akun'}
+            </button>
+            <button
+              onClick={() => { setStep('shoot'); setShots([]); setResult(null) }}
+              className="w-full bg-white hover:bg-zinc-100 text-zinc-700 border border-zinc-300 py-3 rounded-full font-bold text-xs uppercase transition"
+            >
+              Ambil Ulang / Ganti Template
+            </button>
+          </div>
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_260px_280px] gap-3 items-start">
+      {/* Modal Buat Template Kustom */}
+      <CustomTemplateModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSuccess={handleTemplateCreated}
+        isAdmin={userAccess.isAdmin}
+      />
 
-        {/* Result image */}
-        <div className="retro-canvas rounded-[24px] border-2 border-white/60 p-4 shadow-md flex items-center justify-center min-h-[300px]">
-          {result && <img src={result} alt="Kolase" className="max-h-[580px] w-auto rounded-xl shadow-xl" style={{ maxWidth: '100%' }} />}
-        </div>
-
-        {/* Actions */}
-        <div className="space-y-3">
-          <div className="retro-canvas rounded-[24px] border-2 border-white/60 p-4 shadow-md">
-            <div className="text-[9px] font-mono tracking-widest text-zinc-500 uppercase mb-1">Kolase Siap</div>
-            <h3 className="text-base font-black text-zinc-900 mb-1">Foto Berhasil!</h3>
-            <p className="text-[10px] text-zinc-500 mb-3 leading-relaxed">
-              <strong>{template.name}</strong> · <strong>{layoutDef.name}</strong>
-            </p>
-            <div className="space-y-2">
-              <button onClick={handlePrint} className="w-full btn-white-pill border border-zinc-200 py-2.5 rounded-full font-extrabold text-xs tracking-wide uppercase hover:scale-[1.02] transition-transform">
-                🖨 Cetak
+      {/* Modal Ajakan Berlangganan jika trial habis */}
+      {showUpgradeModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-[#f5f4ef] rounded-3xl border-2 border-white p-6 max-w-md w-full shadow-2xl text-center space-y-4">
+            <div className="w-16 h-16 mx-auto rounded-2xl bg-amber-100 border border-amber-300 flex items-center justify-center text-3xl">
+              ⭐
+            </div>
+            <div>
+              <h3 className="text-xl font-black text-zinc-900">Masa Percobaan 7 Hari Selesai</h3>
+              <p className="text-xs text-zinc-600 mt-2 leading-relaxed">
+                Fitur membuat template custom pribadi hanya tersedia untuk pengguna dalam masa trial 7 hari gratis atau pengguna dengan langganan aktif.
+              </p>
+            </div>
+            <div className="bg-white p-3.5 rounded-2xl border border-zinc-200 text-xs text-left space-y-1">
+              <p className="font-bold text-zinc-800">Paket Mulai Dari:</p>
+              <p className="text-zinc-600">• Rp 10.000 / 30 hari</p>
+              <p className="text-zinc-600">• Rp 120.000 / 1 tahun penuh</p>
+            </div>
+            <div className="flex gap-2 pt-2">
+              <button
+                onClick={() => setShowUpgradeModal(false)}
+                className="flex-1 py-2.5 rounded-xl text-xs font-bold bg-zinc-200 text-zinc-700 hover:bg-zinc-300 transition"
+              >
+                Nanti Dulu
               </button>
-              <button onClick={handleDownload} className="w-full py-2.5 rounded-full font-extrabold text-xs uppercase text-zinc-700 bg-white hover:bg-zinc-50 border border-zinc-300 shadow-sm hover:scale-[1.02] transition-transform">
-                ↓ Unduh JPG
-              </button>
-              <button onClick={handleSave} disabled={saving || saved}
-                className="w-full btn-orange-glow py-2.5 rounded-full text-white font-extrabold text-xs uppercase hover:scale-[1.02] transition-transform disabled:opacity-60 disabled:scale-100">
-                {saved ? '✓ Tersimpan' : saving ? 'Menyimpan...' : '☁ Simpan ke Galeri'}
-              </button>
-              <button onClick={reset} className="w-full py-2.5 rounded-full text-xs font-bold text-zinc-400 hover:text-zinc-600 border border-transparent hover:border-zinc-200 transition">
-                ← Mulai dari Awal
-              </button>
+              <Link
+                href="/subscription"
+                className="flex-1 py-2.5 rounded-xl text-xs font-black bg-[#e85200] text-white hover:bg-[#ff5d07] shadow-lg shadow-orange-500/20 transition flex items-center justify-center"
+              >
+                Berlangganan Sekarang
+              </Link>
             </div>
           </div>
         </div>
-
-        {/* Re-pick template on result screen */}
-        <div className="retro-canvas rounded-[24px] border-2 border-white/60 p-3.5 shadow-md">
-          <div className="text-[9px] font-mono tracking-widest text-zinc-500 uppercase mb-2">Ganti Template</div>
-          <div className="grid grid-cols-5 gap-1.5 overflow-y-auto max-h-[480px]"
-            style={{ scrollbarWidth: 'thin', scrollbarColor: '#d1d5db transparent' }}>
-            {TEMPLATES.map(t => (
-              <button key={t.id}
-                onClick={async () => {
-                  setTemplate(t)
-                  const c = await composeCollage(shots, layout, t)
-                  setResult(c); setSaved(false)
-                }}
-                title={t.name}
-                className={`relative flex flex-col items-center justify-end rounded-xl border-2 overflow-hidden transition-all ${
-                  template.id === t.id ? 'border-[#e85200] shadow-md scale-[1.06] z-10' : 'border-transparent hover:border-zinc-300 hover:scale-[1.03]'
-                }`}
-                style={{ aspectRatio: '2/3' }}
-              >
-                <div className="absolute inset-0 p-1" style={{ background: t.bg.startsWith('linear') ? 'linear-gradient(135deg,#fce4f3,#e8eaff,#d4f5e9)' : t.bg }}>
-                  <CollagePreview shots={shots} layout={layout} tpl={t} size="sm" />
-                </div>
-                <div className="relative z-10 w-full px-1 pb-1 pt-3" style={{ background: 'linear-gradient(to top,rgba(0,0,0,0.7) 0%,transparent 100%)' }}>
-                  <div className="text-[7px] font-bold text-white leading-tight text-center drop-shadow truncate">{t.name}</div>
-                </div>
-                {template.id === t.id && (
-                  <div className="absolute top-0.5 right-0.5 w-3.5 h-3.5 bg-[#e85200] rounded-full flex items-center justify-center text-[7px] text-white font-black z-20">✓</div>
-                )}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
+      )}
     </div>
   )
 }

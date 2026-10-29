@@ -17,6 +17,7 @@ model User {
   createdAt     DateTime       @default(now())
   photos        Photo[]
   subscriptions Subscription[]
+  customTemplates CustomTemplate[]
 }
 
 enum Role {
@@ -63,6 +64,37 @@ model Notification {
 
   @@index([read])
   @@index([createdAt])
+}
+
+model CustomTemplate {
+  id                String   @id @default(cuid())
+  userId            String
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name              String
+  category          String   @default("Kustom")
+  tag               String   @default("Custom")
+  tagColor          String   @default("bg-orange-600 text-white")
+  usesCount         String   @default("0 uses")
+  photosCount       Int      @default(4)
+  recommendedLayout String   @default("strip4")
+  bg                String   @default("#ffffff")
+  frame             String   @default("#e85200")
+  frameWidth        Int      @default(4)
+  rounded           Int      @default(12)
+  gap               Int      @default(12)
+  pad               Int      @default(16)
+  textColor         String   @default("#1c1c1c")
+  labelText         String   @default("My Memories")
+  subText           String   @default("FRAMERIO PHOTOBOOTH")
+  filter            String   @default("none")
+  styleType         String   @default("custom")
+  bgImage           String?  @db.Text
+  isPublic          Boolean  @default(false)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([userId])
+  @@index([isPublic])
 }
 
 enum PaymentMethod {
