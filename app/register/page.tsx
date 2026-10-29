@@ -1,18 +1,43 @@
 'use client'
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { signIn } from 'next-auth/react'
 import Link from 'next/link'
 import MathCaptcha from '@/components/MathCaptcha'
 import BrandLogo from '@/components/BrandLogo'
 
+const PASSWORD_RULES = [
+  { id: 'length', label: 'Minimal 8 karakter',  test: (p: string) => p.length >= 8 },
+  { id: 'upper',  label: 'Huruf besar (A-Z)',    test: (p: string) => /[A-Z]/.test(p) },
+  { id: 'lower',  label: 'Huruf kecil (a-z)',    test: (p: string) => /[a-z]/.test(p) },
+  { id: 'number', label: 'Angka (0-9)',           test: (p: string) => /[0-9]/.test(p) },
+  { id: 'symbol', label: 'Simbol (@$!%*?&)',     test: (p: string) => /[@$!%*?&]/.test(p) },
+]
+
 export default function RegisterPage() {
-  const router = useRouter()
   const [form, setForm] = useState({ name: '', email: '', password: '' })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [captchaValid, setCaptchaValid] = useState(false)
+  const [passwordTouched, setPasswordTouched] = useState(false)
+
+  const passwordChecks = PASSWORD_RULES.map(r => ({ ...r, passed: r.test(form.password) }))
+  const allPassed = passwordChecks.every(r => r.passed)
+  const passedCount = passwordChecks.filter(r => r.passed).length
+
+  const strengthColor =
+    passedCount <= 1 ? 'bg-red-500' :
+    passedCount <= 2 ? 'bg-orange-500' :
+    passedCount <= 3 ? 'bg-yellow-500' :
+    passedCount <= 4 ? 'bg-blue-500' :
+    'bg-emerald-500'
+
+  const strengthLabel =
+    passedCount <= 1 ? 'Sangat Lemah' :
+    passedCount <= 2 ? 'Lemah' :
+    passedCount <= 3 ? 'Cukup' :
+    passedCount <= 4 ? 'Kuat' :
+    'Sangat Kuat'
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -20,6 +45,12 @@ export default function RegisterPage() {
 
     if (!captchaValid) {
       setError('Selesaikan verifikasi matematika dengan benar.')
+      return
+    }
+
+    if (!allPassed) {
+      setError('Kata sandi belum memenuhi semua persyaratan.')
+      setPasswordTouched(true)
       return
     }
 
@@ -35,7 +66,6 @@ export default function RegisterPage() {
     if (!res.ok) {
       setError(data.error || 'Pendaftaran akun gagal.')
     } else {
-      // Langsung login otomatis menggunakan identifier (bisa username atau email)
       await signIn('credentials', {
         identifier: form.email,
         password: form.password,
@@ -47,12 +77,10 @@ export default function RegisterPage() {
   return (
     <div className="flex-1 flex items-center justify-center px-4 py-8 sm:py-12">
       <div className="w-full max-w-md bg-[#e4e3de] rounded-[36px] p-6 sm:p-10 border-4 border-white shadow-xl">
+
+        {/* Header */}
         <div className="text-center mb-6 sm:mb-8">
-          <BrandLogo
-            width={756}
-            height={155}
-            className="mx-auto mb-4 h-auto w-[184px]"
-          />
+          <BrandLogo width={756} height={155} className="mx-auto mb-4 h-auto w-[184px]" />
           <h1 className="text-2xl sm:text-3xl font-black text-zinc-900 tracking-tight uppercase">
             Pendaftaran Akun
           </h1>
@@ -68,6 +96,8 @@ export default function RegisterPage() {
         )}
 
         <form onSubmit={onSubmit} className="space-y-4">
+
+          {/* Username */}
           <div>
             <label className="block text-xs font-bold text-zinc-700 mb-1.5 uppercase tracking-wider">
               Username Unik
@@ -82,6 +112,7 @@ export default function RegisterPage() {
             />
           </div>
 
+          {/* Email */}
           <div>
             <label className="block text-xs font-bold text-zinc-700 mb-1.5 uppercase tracking-wider">
               Alamat Email
@@ -96,6 +127,7 @@ export default function RegisterPage() {
             />
           </div>
 
+          {/* Password */}
           <div>
             <label className="block text-xs font-bold text-zinc-700 mb-1.5 uppercase tracking-wider">
               Kata Sandi
@@ -104,11 +136,20 @@ export default function RegisterPage() {
               <input
                 type={showPassword ? 'text' : 'password'}
                 required
-                minLength={8}
-                className="w-full bg-white border border-zinc-300 rounded-2xl px-4 py-3 pr-12 text-zinc-900 placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-[#e85200]/50 focus:border-[#e85200] transition text-sm shadow-inner"
-                placeholder="Minimal 8 karakter"
+                className={`w-full bg-white border rounded-2xl px-4 py-3 pr-12 text-zinc-900 placeholder-zinc-400 focus:outline-none focus:ring-2 transition text-sm shadow-inner ${
+                  passwordTouched && !allPassed
+                    ? 'border-red-400 focus:ring-red-400/50 focus:border-red-400'
+                    : allPassed && form.password
+                    ? 'border-emerald-400 focus:ring-emerald-400/50 focus:border-emerald-400'
+                    : 'border-zinc-300 focus:ring-[#e85200]/50 focus:border-[#e85200]'
+                }`}
+                placeholder="Buat kata sandi yang kuat"
                 value={form.password}
-                onChange={(e) => setForm({ ...form, password: e.target.value })}
+                onChange={(e) => {
+                  setForm({ ...form, password: e.target.value })
+                  setPasswordTouched(true)
+                }}
+                onFocus={() => setPasswordTouched(true)}
               />
               <button
                 type="button"
@@ -129,12 +170,61 @@ export default function RegisterPage() {
                 )}
               </button>
             </div>
+
+            {/* Strength bar + Checklist */}
+            {passwordTouched && form.password && (
+              <div className="mt-2.5 bg-white rounded-2xl border border-zinc-200 p-3 space-y-2.5 shadow-sm">
+                {/* Strength bar */}
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Kekuatan</span>
+                    <span className={`text-[10px] font-black ${
+                      passedCount <= 2 ? 'text-red-500' :
+                      passedCount <= 3 ? 'text-yellow-600' :
+                      passedCount <= 4 ? 'text-blue-600' : 'text-emerald-600'
+                    }`}>
+                      {strengthLabel}
+                    </span>
+                  </div>
+                  <div className="w-full h-1.5 bg-zinc-100 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full rounded-full transition-all duration-300 ${strengthColor}`}
+                      style={{ width: `${(passedCount / 5) * 100}%` }}
+                    />
+                  </div>
+                </div>
+
+                {/* Checklist */}
+                <div className="grid grid-cols-1 gap-1.5">
+                  {passwordChecks.map((rule) => (
+                    <div key={rule.id} className="flex items-center gap-2">
+                      <div className={`flex-shrink-0 w-4 h-4 rounded-full flex items-center justify-center transition-all ${
+                        rule.passed ? 'bg-emerald-500' : 'bg-zinc-200'
+                      }`}>
+                        {rule.passed ? (
+                          <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                          </svg>
+                        ) : (
+                          <div className="w-1.5 h-1.5 rounded-full bg-zinc-400" />
+                        )}
+                      </div>
+                      <span className={`text-[11px] font-medium transition-colors ${
+                        rule.passed ? 'text-emerald-700' : 'text-zinc-500'
+                      }`}>
+                        {rule.label}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           <MathCaptcha onValidate={setCaptchaValid} />
 
           <button
-            disabled={loading || !captchaValid}
+            disabled={loading || !captchaValid || !allPassed}
             className="w-full mt-2 btn-orange-glow text-white py-3.5 rounded-full font-black text-xs sm:text-sm tracking-wider uppercase shadow-lg transition-transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed"
           >
             {loading ? 'Mendaftarkan Akun...' : 'Daftar dan Mulai Akses'}
@@ -149,6 +239,7 @@ export default function RegisterPage() {
             </Link>
           </p>
         </div>
+
       </div>
     </div>
   )

@@ -20,6 +20,13 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Password minimal 8 karakter' }, { status: 400 })
     }
 
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[@$!%*?&]).{8,}$/
+    if (!passwordRegex.test(password)) {
+      return NextResponse.json({
+        error: 'Password harus mengandung huruf besar, huruf kecil, angka, dan simbol (@$!%*?&)'
+      }, { status: 400 })
+    }
+
     // Cek apakah Email sudah terdaftar
     const existingEmail = await prisma.user.findUnique({
       where: { email: trimmedEmail }

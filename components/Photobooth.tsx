@@ -1528,9 +1528,18 @@ export default function Photobooth({ allowed }: { allowed: boolean }) {
                 {/* Tombol Buat Template Sendiri */}
                 <button
                   onClick={handleOpenCreateModal}
-                  className="px-4 py-2 rounded-full text-xs font-black bg-[#e85200] hover:bg-[#ff5d07] text-white shadow-md shadow-orange-500/20 transition-all flex items-center gap-1.5 transform hover:scale-105"
+                  disabled={userAccess.authenticated && !userAccess.canCreateTemplate}
+                  className={`px-4 py-2 rounded-full text-xs font-black transition-all flex items-center gap-1.5 relative
+                    ${userAccess.authenticated && !userAccess.canCreateTemplate
+                      ? 'bg-zinc-300 text-zinc-500 cursor-not-allowed shadow-none opacity-70'
+                      : 'bg-[#e85200] hover:bg-[#ff5d07] text-white shadow-md shadow-orange-500/20 transform hover:scale-105 cursor-pointer'
+                    }`}
                 >
-                  <span>✨</span> + Buat Template Sendiri
+                  <span>{userAccess.authenticated && !userAccess.canCreateTemplate ? '🔒' : '✨'}</span>
+                  + Buat Template Sendiri
+                  {userAccess.authenticated && !userAccess.canCreateTemplate && (
+                    <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center text-white text-[8px] font-black">!</span>
+                  )}
                 </button>
               </div>
             </div>
@@ -1649,36 +1658,83 @@ export default function Photobooth({ allowed }: { allowed: boolean }) {
         isAdmin={userAccess.isAdmin}
       />
 
-      {/* Modal Ajakan Berlangganan jika trial habis */}
+      {/* Modal Ajakan Berlangganan jika trial/langganan habis */}
       {showUpgradeModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-[#f5f4ef] rounded-3xl border-2 border-white p-6 max-w-md w-full shadow-2xl text-center space-y-4">
-            <div className="w-16 h-16 mx-auto rounded-2xl bg-amber-100 border border-amber-300 flex items-center justify-center text-3xl">
-              ⭐
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
+          onClick={(e) => { if (e.target === e.currentTarget) setShowUpgradeModal(false) }}
+        >
+          <div className="bg-[#f5f4ef] rounded-3xl border-2 border-white p-6 max-w-sm w-full shadow-2xl text-center space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-200">
+            {/* Icon */}
+            <div className="relative w-16 h-16 mx-auto">
+              <div className="w-16 h-16 rounded-2xl bg-red-100 border-2 border-red-200 flex items-center justify-center text-3xl">
+                🔒
+              </div>
+              <div className="absolute -top-1 -right-1 w-6 h-6 bg-[#e85200] rounded-full flex items-center justify-center text-white text-xs font-black">
+                !
+              </div>
             </div>
+
+            {/* Title & Description */}
             <div>
-              <h3 className="text-xl font-black text-zinc-900">Masa Percobaan 7 Hari Selesai</h3>
+              <h3 className="text-lg font-black text-zinc-900">
+                {userAccess.isTrialActive === false && !userAccess.hasActiveSub
+                  ? 'Akses Terkunci'
+                  : 'Akses Terkunci'}
+              </h3>
               <p className="text-xs text-zinc-600 mt-2 leading-relaxed">
-                Fitur membuat template custom pribadi hanya tersedia untuk pengguna dalam masa trial 7 hari gratis atau pengguna dengan langganan aktif.
+                {!userAccess.hasActiveSub && !userAccess.isTrialActive
+                  ? 'Masa percobaan 7 hari gratis dan langganan Anda telah berakhir. Segera berlangganan kembali untuk membuat template sendiri.'
+                  : 'Fitur ini memerlukan langganan aktif. Segera berlangganan untuk membuka akses penuh.'}
               </p>
             </div>
-            <div className="bg-white p-3.5 rounded-2xl border border-zinc-200 text-xs text-left space-y-1">
-              <p className="font-bold text-zinc-800">Paket Mulai Dari:</p>
-              <p className="text-zinc-600">• Rp 10.000 / 30 hari</p>
-              <p className="text-zinc-600">• Rp 120.000 / 1 tahun penuh</p>
+
+            {/* Status Badge */}
+            <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-2.5 flex items-center gap-2 text-xs">
+              <span className="text-red-500 text-base">⛔</span>
+              <div className="text-left">
+                <p className="font-bold text-red-700">
+                  {!userAccess.isTrialActive ? 'Trial 7 hari: Sudah habis' : 'Trial masih aktif'}
+                </p>
+                <p className="text-red-500 text-[10px]">
+                  {!userAccess.hasActiveSub ? 'Langganan: Tidak aktif / sudah habis' : 'Langganan masih aktif'}
+                </p>
+              </div>
             </div>
-            <div className="flex gap-2 pt-2">
+
+            {/* Paket */}
+            <div className="bg-white p-3.5 rounded-2xl border border-zinc-200 text-xs text-left space-y-1.5">
+              <p className="font-bold text-zinc-800 mb-2">Pilih Paket Berlangganan:</p>
+              <div className="flex items-center justify-between px-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-[#e85200] text-sm">◈</span>
+                  <span className="text-zinc-700 font-semibold">Bulanan</span>
+                </div>
+                <span className="font-black text-zinc-900">Rp 10.000 <span className="font-normal text-zinc-500">/ 30 hari</span></span>
+              </div>
+              <div className="flex items-center justify-between px-1">
+                <div className="flex items-center gap-2">
+                  <span className="text-[#e85200] text-sm">◈</span>
+                  <span className="text-zinc-700 font-semibold">Tahunan</span>
+                </div>
+                <span className="font-black text-zinc-900">Rp 120.000 <span className="font-normal text-zinc-500">/ tahun</span></span>
+              </div>
+            </div>
+
+            {/* Buttons */}
+            <div className="flex gap-2 pt-1">
               <button
                 onClick={() => setShowUpgradeModal(false)}
-                className="flex-1 py-2.5 rounded-xl text-xs font-bold bg-zinc-200 text-zinc-700 hover:bg-zinc-300 transition"
+                className="flex-1 py-2.5 rounded-xl text-xs font-bold bg-zinc-200 text-zinc-600 hover:bg-zinc-300 transition"
               >
                 Nanti Dulu
               </button>
               <Link
-                href="/subscription"
-                className="flex-1 py-2.5 rounded-xl text-xs font-black bg-[#e85200] text-white hover:bg-[#ff5d07] shadow-lg shadow-orange-500/20 transition flex items-center justify-center"
+                href="/pricing"
+                onClick={() => setShowUpgradeModal(false)}
+                className="flex-1 py-2.5 rounded-xl text-xs font-black bg-[#e85200] text-white hover:bg-[#ff5d07] shadow-lg shadow-orange-500/20 transition flex items-center justify-center gap-1.5"
               >
-                Berlangganan Sekarang
+                <span>⚡</span> Berlangganan
               </Link>
             </div>
           </div>

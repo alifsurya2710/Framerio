@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Card3D from '@/components/Card3D'
+import AdminCreateTemplateModal from '@/components/AdminCreateTemplateModal'
 
 interface TemplateItem {
   id: string
@@ -22,6 +23,7 @@ interface TemplateItem {
   subText: string
   filter: string
   styleType: string
+  bgImage?: string | null
   isPublic: boolean
   createdAt: string
   user: {
@@ -37,6 +39,7 @@ export default function AdminTemplatesPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [filter, setFilter] = useState<'all' | 'public' | 'private'>('all')
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
 
   const fetchTemplates = async () => {
     setLoading(true)
@@ -103,44 +106,54 @@ export default function AdminTemplatesPage() {
   })
 
   return (
-    <div className="p-8 max-w-7xl mx-auto space-y-6">
+    <div className="p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-black text-zinc-900 tracking-tight flex items-center gap-2">
-            <span className="text-[#e85200]">▣</span> Kelola Custom Template
+            <span className="text-[#e85200]">▣</span> Kelola Template Perangkat
           </h1>
           <p className="text-xs text-zinc-600 mt-1">
-            Daftar template yang dibuat oleh Pengguna (Trial 7 hari / Member Aktif) dan Administrator.
+            Template yang dibuat dari upload gambar perangkat — oleh pengguna maupun administrator.
           </p>
         </div>
 
-        <div className="flex items-center gap-2 bg-[#b8b7b2] p-1 rounded-xl shadow-inner text-xs font-bold text-zinc-700">
-          <button
-            onClick={() => setFilter('all')}
-            className={`px-3 py-1.5 rounded-lg transition-all ${
-              filter === 'all' ? 'bg-[#1c1c1c] text-white shadow-md' : 'hover:bg-white/40'
-            }`}
-          >
-            Semua ({templates.length})
-          </button>
-          <button
-            onClick={() => setFilter('public')}
-            className={`px-3 py-1.5 rounded-lg transition-all ${
-              filter === 'public' ? 'bg-emerald-700 text-white shadow-md' : 'hover:bg-white/40'
-            }`}
-          >
-            Publik ({templates.filter((t) => t.isPublic).length})
-          </button>
-          <button
-            onClick={() => setFilter('private')}
-            className={`px-3 py-1.5 rounded-lg transition-all ${
-              filter === 'private' ? 'bg-zinc-800 text-white shadow-md' : 'hover:bg-white/40'
-            }`}
-          >
-            Pribadi User ({templates.filter((t) => !t.isPublic).length})
-          </button>
-        </div>
+        {/* Tombol Buat Template Baru */}
+        <button
+          onClick={() => setIsCreateModalOpen(true)}
+          className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#e85200] hover:bg-[#ff5d07] text-white text-xs font-black shadow-lg shadow-orange-500/20 transition-all"
+        >
+          <span className="text-base">📤</span>
+          Buat Template Baru
+        </button>
+      </div>
+
+      {/* Filter Tabs */}
+      <div className="flex items-center gap-2 bg-[#b8b7b2] p-1 rounded-xl shadow-inner text-xs font-bold text-zinc-700 w-fit">
+        <button
+          onClick={() => setFilter('all')}
+          className={`px-3 py-1.5 rounded-lg transition-all ${
+            filter === 'all' ? 'bg-[#1c1c1c] text-white shadow-md' : 'hover:bg-white/40'
+          }`}
+        >
+          Semua ({templates.length})
+        </button>
+        <button
+          onClick={() => setFilter('public')}
+          className={`px-3 py-1.5 rounded-lg transition-all ${
+            filter === 'public' ? 'bg-emerald-700 text-white shadow-md' : 'hover:bg-white/40'
+          }`}
+        >
+          Publik ({templates.filter((t) => t.isPublic).length})
+        </button>
+        <button
+          onClick={() => setFilter('private')}
+          className={`px-3 py-1.5 rounded-lg transition-all ${
+            filter === 'private' ? 'bg-zinc-800 text-white shadow-md' : 'hover:bg-white/40'
+          }`}
+        >
+          Pribadi ({templates.filter((t) => !t.isPublic).length})
+        </button>
       </div>
 
       {error && (
@@ -155,124 +168,124 @@ export default function AdminTemplatesPage() {
         </div>
       ) : filtered.length === 0 ? (
         <div className="py-20 text-center bg-[#dad9d4] rounded-2xl border-2 border-dashed border-zinc-400">
-          <p className="text-sm font-bold text-zinc-600">Belum ada template kustom yang dibuat.</p>
+          <p className="text-sm font-bold text-zinc-600">Belum ada template yang tersimpan.</p>
           <p className="text-xs text-zinc-500 mt-1">
-            User dapat membuatnya langsung dari Photobooth Console dengan tombol "+ Buat Template Sendiri".
+            Klik "Buat Template Baru" di atas untuk upload template dari perangkat.
           </p>
+          <button
+            onClick={() => setIsCreateModalOpen(true)}
+            className="mt-4 px-5 py-2 rounded-xl bg-[#e85200] text-white text-xs font-black hover:bg-[#ff5d07] transition"
+          >
+            📤 Upload Template Sekarang
+          </button>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filtered.map((tmpl) => (
             <Card3D
               key={tmpl.id}
-              className="bg-[#f5f4ef] rounded-2xl p-5 border border-black/10 shadow-[0_8px_20px_rgba(0,0,0,0.08)] flex flex-col justify-between"
+              className="bg-[#f5f4ef] rounded-2xl border border-black/10 shadow-[0_8px_20px_rgba(0,0,0,0.08)] flex flex-col overflow-hidden"
             >
-              <div>
-                {/* Header Card */}
-                <div className="flex items-start justify-between gap-2 mb-3">
-                  <div>
-                    <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-zinc-200 text-zinc-700">
-                      {tmpl.category}
-                    </span>
-                    <h3 className="text-base font-black text-zinc-900 mt-1">{tmpl.name}</h3>
+              {/* Preview Gambar Template */}
+              <div className="relative bg-zinc-200 overflow-hidden" style={{ aspectRatio: '9/16', maxHeight: 220 }}>
+                {tmpl.bgImage ? (
+                  <img
+                    src={tmpl.bgImage}
+                    alt={tmpl.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-zinc-400">
+                    <div className="text-center">
+                      <div className="text-4xl mb-1">🖼</div>
+                      <p className="text-xs">Tidak ada gambar</p>
+                    </div>
                   </div>
+                )}
 
+                {/* Status Badge Overlay */}
+                <div className="absolute top-2 right-2">
                   <span
-                    className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                    className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
                       tmpl.isPublic
-                        ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
-                        : 'bg-zinc-200 text-zinc-700'
+                        ? 'bg-emerald-500 text-white'
+                        : 'bg-zinc-800/80 text-white'
                     }`}
                   >
-                    {tmpl.isPublic ? 'Publik (Semua User)' : 'Pribadi User'}
+                    {tmpl.isPublic ? '🌐 Publik' : '🔒 Pribadi'}
                   </span>
                 </div>
 
-                {/* Creator info */}
-                <div className="text-[11px] text-zinc-500 mb-3 bg-zinc-100 p-2 rounded-lg border border-zinc-200">
-                  <div>
-                    <strong className="text-zinc-700">Pembuat:</strong> {tmpl.user?.name || tmpl.user?.email}
-                  </div>
-                  <div>
-                    <strong className="text-zinc-700">Role:</strong> {tmpl.user?.role} |{' '}
-                    <strong className="text-zinc-700">Foto:</strong> {tmpl.photosCount} pose ({tmpl.recommendedLayout})
-                  </div>
-                </div>
-
-                {/* Mini Visual Preview */}
-                <div
-                  className="w-full h-36 rounded-xl p-3 flex flex-col items-center justify-between border shadow-inner mb-4 transition-transform"
-                  style={{
-                    backgroundColor: tmpl.bg,
-                    borderColor: tmpl.frame || '#333'
-                  }}
-                >
-                  <div
-                    className="w-full grid gap-1.5 h-20"
-                    style={{
-                      gridTemplateColumns:
-                        tmpl.photosCount > 4
-                          ? 'repeat(3, 1fr)'
-                          : tmpl.photosCount === 2
-                          ? 'repeat(2, 1fr)'
-                          : 'repeat(4, 1fr)'
-                    }}
+                {/* Role Badge */}
+                <div className="absolute top-2 left-2">
+                  <span
+                    className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
+                      tmpl.user?.role === 'ADMIN'
+                        ? 'bg-[#e85200] text-white'
+                        : 'bg-purple-600 text-white'
+                    }`}
                   >
-                    {Array.from({ length: Math.min(tmpl.photosCount, 6) }).map((_, idx) => (
-                      <div
-                        key={idx}
-                        className="h-full rounded bg-black/10 border border-black/20 flex items-center justify-center text-[8px] font-mono font-bold"
-                        style={{
-                          borderRadius: `${tmpl.rounded / 2}px`,
-                          borderColor: tmpl.frame
-                        }}
-                      >
-                        #{idx + 1}
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="w-full text-center">
-                    <p
-                      className="text-xs font-bold truncate leading-tight"
-                      style={{ color: tmpl.textColor }}
-                    >
-                      {tmpl.labelText}
-                    </p>
-                    <p
-                      className="text-[9px] uppercase tracking-wider opacity-75 truncate"
-                      style={{ color: tmpl.textColor }}
-                    >
-                      {tmpl.subText}
-                    </p>
-                  </div>
+                    {tmpl.user?.role === 'ADMIN' ? '⭐ Admin' : '👤 User'}
+                  </span>
                 </div>
               </div>
 
-              {/* Actions */}
-              <div className="pt-3 border-t border-zinc-200 flex items-center justify-between gap-2">
-                <button
-                  onClick={() => handleTogglePublic(tmpl.id, tmpl.isPublic)}
-                  className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all ${
-                    tmpl.isPublic
-                      ? 'bg-zinc-200 hover:bg-zinc-300 text-zinc-800'
-                      : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-md'
-                  }`}
-                >
-                  {tmpl.isPublic ? 'Jadikan Pribadi' : 'Publikasikan'}
-                </button>
+              <div className="p-4 flex flex-col justify-between flex-1">
+                {/* Info */}
+                <div className="space-y-2 mb-4">
+                  <h3 className="text-sm font-black text-zinc-900 leading-tight">{tmpl.name}</h3>
+                  <div className="text-[10px] text-zinc-500 bg-zinc-100 p-2 rounded-lg border border-zinc-200 space-y-0.5">
+                    <div>
+                      <strong className="text-zinc-700">Pembuat:</strong>{' '}
+                      {tmpl.user?.name || tmpl.user?.email}
+                    </div>
+                    <div>
+                      <strong className="text-zinc-700">Foto:</strong> {tmpl.photosCount} pose
+                      {' · '}
+                      <strong className="text-zinc-700">Layout:</strong> {tmpl.recommendedLayout}
+                    </div>
+                    <div>
+                      <strong className="text-zinc-700">Dibuat:</strong>{' '}
+                      {new Date(tmpl.createdAt).toLocaleDateString('id-ID', {
+                        day: 'numeric',
+                        month: 'short',
+                        year: 'numeric'
+                      })}
+                    </div>
+                  </div>
+                </div>
 
-                <button
-                  onClick={() => handleDelete(tmpl.id)}
-                  className="py-2 px-3 rounded-xl text-xs font-bold bg-red-100 hover:bg-red-200 text-red-700 transition-all border border-red-200"
-                >
-                  Hapus
-                </button>
+                {/* Actions */}
+                <div className="flex items-center justify-between gap-2">
+                  <button
+                    onClick={() => handleTogglePublic(tmpl.id, tmpl.isPublic)}
+                    className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all ${
+                      tmpl.isPublic
+                        ? 'bg-zinc-200 hover:bg-zinc-300 text-zinc-800'
+                        : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-md'
+                    }`}
+                  >
+                    {tmpl.isPublic ? 'Jadikan Pribadi' : 'Publikasikan'}
+                  </button>
+                  <button
+                    onClick={() => handleDelete(tmpl.id)}
+                    className="py-2 px-3 rounded-xl text-xs font-bold bg-red-100 hover:bg-red-200 text-red-700 transition-all border border-red-200"
+                  >
+                    Hapus
+                  </button>
+                </div>
               </div>
             </Card3D>
           ))}
         </div>
       )}
+
+      {/* Modal Buat Template Baru (Admin) */}
+      <AdminCreateTemplateModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onSuccess={fetchTemplates}
+      />
     </div>
   )
 }

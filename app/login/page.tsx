@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { signIn } from 'next-auth/react'
+import { signIn, getSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import MathCaptcha from '@/components/MathCaptcha'
@@ -87,7 +87,9 @@ export default function LoginPage() {
       }
     } else {
       localStorage.removeItem('framerio_login_lockout')
-      router.push('/booth')
+      const session = await getSession()
+      const role = (session?.user as any)?.role
+      router.push(role === 'ADMIN' ? '/admin' : '/booth')
     }
   }
 
