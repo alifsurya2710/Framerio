@@ -2,7 +2,7 @@
 // Framerio Service Worker — Auto Update on New Deploy
 // ============================================================
 
-const CACHE_NAME = 'framerio-v1'
+const CACHE_NAME = 'framerio-v2'
 
 // File statis yang di-cache (shell app saja)
 const STATIC_ASSETS = [
@@ -40,13 +40,6 @@ self.addEventListener('activate', (event) => {
       self.clients.claim()
     ])
   )
-
-  // Kirim pesan ke semua client bahwa ada update
-  self.clients.matchAll({ type: 'window' }).then((clients) => {
-    clients.forEach((client) => {
-      client.postMessage({ type: 'SW_UPDATED' })
-    })
-  })
 })
 
 // ── FETCH: network-first untuk API, cache-first untuk assets ─

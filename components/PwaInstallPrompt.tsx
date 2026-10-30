@@ -5,38 +5,12 @@ export default function PwaInstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null)
   const [showPrompt, setShowPrompt] = useState(false)
   const [isStandalone, setIsStandalone] = useState(false)
-  const [showUpdateBanner, setShowUpdateBanner] = useState(false)
 
-  // ── Daftarkan Service Worker ─────────────────────────────
+  // ── Daftarkan Service Worker (update otomatis, tanpa banner) ─
   useEffect(() => {
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker
-        .register('/sw.js')
-        .then((reg) => {
-          // Cek apakah ada update SW yang menunggu
-          reg.addEventListener('updatefound', () => {
-            const newWorker = reg.installing
-            if (!newWorker) return
-            newWorker.addEventListener('statechange', () => {
-              if (
-                newWorker.state === 'installed' &&
-                navigator.serviceWorker.controller
-              ) {
-                // Ada versi baru tersedia
-                setShowUpdateBanner(true)
-              }
-            })
-          })
-        })
-        .catch(() => {
-          // SW tidak bisa didaftarkan — abaikan
-        })
-
-      // Dengarkan pesan SW_UPDATED dari service worker
-      navigator.serviceWorker.addEventListener('message', (event) => {
-        if (event.data?.type === 'SW_UPDATED') {
-          setShowUpdateBanner(true)
-        }
+      navigator.serviceWorker.register('/sw.js').catch(() => {
+        // SW tidak bisa didaftarkan — abaikan
       })
     }
   }, [])
@@ -96,40 +70,8 @@ export default function PwaInstallPrompt() {
     }
   }
 
-  function handleReload() {
-    setShowUpdateBanner(false)
-    window.location.reload()
-  }
-
   return (
     <>
-      {/* ── Banner Update Tersedia ─────────────────────────── */}
-      {showUpdateBanner && (
-        <div className="fixed top-0 left-0 right-0 z-[60] flex items-center justify-between gap-3 bg-[#1c1c1c] text-white px-4 py-3 shadow-lg animate-in slide-in-from-top-2 duration-300">
-          <div className="flex items-center gap-2.5 text-xs font-semibold">
-            <span className="text-lg">🔄</span>
-            <span>
-              Versi baru Framerio tersedia!{' '}
-              <span className="text-zinc-400 font-normal">Muat ulang untuk fitur terbaru.</span>
-            </span>
-          </div>
-          <div className="flex items-center gap-2 flex-shrink-0">
-            <button
-              onClick={() => setShowUpdateBanner(false)}
-              className="text-zinc-500 hover:text-zinc-300 text-xs px-2 py-1 transition"
-            >
-              Nanti
-            </button>
-            <button
-              onClick={handleReload}
-              className="px-3 py-1.5 rounded-lg bg-[#e85200] hover:bg-[#ff5d07] text-white text-xs font-black transition"
-            >
-              Perbarui
-            </button>
-          </div>
-        </div>
-      )}
-
       {/* ── PWA Install Prompt ────────────────────────────── */}
       {showPrompt && !isStandalone && (
         <div className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-6 sm:bottom-6 sm:max-w-md z-50 animate-in fade-in slide-in-from-bottom-5 duration-300">
