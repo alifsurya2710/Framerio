@@ -18,12 +18,6 @@ export default function LoginPage() {
   const [failedAttempts, setFailedAttempts] = useState(0)
   const [lockoutTimer, setLockoutTimer] = useState<number>(0)
 
-  // Modal Lupa Password
-  const [forgotModalOpen, setForgotModalOpen] = useState(false)
-  const [forgotIdentifier, setForgotIdentifier] = useState('')
-  const [forgotLoading, setForgotLoading] = useState(false)
-  const [forgotMsg, setForgotMsg] = useState<{ type: 'success' | 'error'; text: string; tempPass?: string } | null>(null)
-
   useEffect(() => {
     const savedLockTime = localStorage.getItem('framerio_login_lockout')
     if (savedLockTime) {
@@ -93,33 +87,6 @@ export default function LoginPage() {
     }
   }
 
-  async function handleForgotPassword(e: React.FormEvent) {
-    e.preventDefault()
-    setForgotLoading(true)
-    setForgotMsg(null)
-    try {
-      const res = await fetch('/api/forgot-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ identifier: forgotIdentifier })
-      })
-      const data = await res.json()
-      setForgotLoading(false)
-      if (!res.ok) {
-        setForgotMsg({ type: 'error', text: data.error || 'Gagal memproses permintaan' })
-      } else {
-        setForgotMsg({
-          type: 'success',
-          text: `Akun ditemukan (${data.email}). Kata sandi sementara Anda:`,
-          tempPass: data.tempPassword
-        })
-      }
-    } catch {
-      setForgotLoading(false)
-      setForgotMsg({ type: 'error', text: 'Terjadi kendala jaringan' })
-    }
-  }
-
   return (
     <div className="flex-1 flex items-center justify-center px-4 py-8 sm:py-12">
       <div className="w-full max-w-md bg-[#e4e3de] rounded-[36px] p-6 sm:p-10 border-4 border-white shadow-xl">
@@ -166,22 +133,9 @@ export default function LoginPage() {
           </div>
 
           <div>
-            <div className="flex items-center justify-between mb-1.5">
-              <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider">
-                Kata Sandi
-              </label>
-              <button
-                type="button"
-                onClick={() => {
-                  setForgotModalOpen(true)
-                  setForgotMsg(null)
-                  setForgotIdentifier(form.identifier)
-                }}
-                className="text-[11px] font-bold text-[#e85200] hover:underline"
-              >
-                Lupa Kata Sandi?
-              </button>
-            </div>
+            <label className="block text-xs font-bold text-zinc-700 mb-1.5 uppercase tracking-wider">
+              Kata Sandi
+            </label>
             <div className="relative">
               <input
                 type={showPassword ? 'text' : 'password'}
@@ -232,72 +186,6 @@ export default function LoginPage() {
           </p>
         </div>
       </div>
-
-      {/* Modal Dialog Lupa Kata Sandi */}
-      {forgotModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-900/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="relative w-full max-w-md bg-[#ecebe6] rounded-[32px] p-6 sm:p-8 border-2 border-white shadow-2xl">
-            <div className="flex items-center justify-between pb-3 border-b border-zinc-300">
-              <h3 className="text-lg font-black text-zinc-900 uppercase">Lupa Kata Sandi</h3>
-              <button
-                type="button"
-                onClick={() => setForgotModalOpen(false)}
-                className="w-7 h-7 rounded-full bg-zinc-300 hover:bg-zinc-400 text-zinc-800 flex items-center justify-center text-xs font-bold"
-              >
-                ✕
-              </button>
-            </div>
-
-            <p className="text-xs text-zinc-600 mt-3 leading-relaxed">
-              Masukkan Username atau Alamat Email Anda yang terdaftar di Framerio untuk mengatur ulang kata sandi sementara.
-            </p>
-
-            {forgotMsg && (
-              <div
-                className={`mt-4 p-3.5 rounded-2xl text-xs font-medium ${
-                  forgotMsg.type === 'success'
-                    ? 'bg-emerald-100 border border-emerald-300 text-emerald-900'
-                    : 'bg-rose-100 border border-rose-300 text-rose-800'
-                }`}
-              >
-                <p>{forgotMsg.text}</p>
-                {forgotMsg.tempPass && (
-                  <div className="mt-2 p-2.5 bg-white rounded-xl border border-emerald-400 font-mono font-black text-sm text-zinc-900 tracking-wider text-center select-all">
-                    {forgotMsg.tempPass}
-                  </div>
-                )}
-              </div>
-            )}
-
-            <form onSubmit={handleForgotPassword} className="mt-4 space-y-3">
-              <input
-                type="text"
-                required
-                placeholder="Username atau nama@email.com"
-                value={forgotIdentifier}
-                onChange={(e) => setForgotIdentifier(e.target.value)}
-                className="w-full bg-white border border-zinc-300 rounded-2xl px-4 py-2.5 text-xs sm:text-sm text-zinc-900 focus:outline-none focus:ring-2 focus:ring-[#e85200]"
-              />
-              <div className="flex gap-2 justify-end pt-2">
-                <button
-                  type="button"
-                  onClick={() => setForgotModalOpen(false)}
-                  className="px-4 py-2 rounded-full bg-white text-zinc-700 text-xs font-bold border border-zinc-300"
-                >
-                  Batal
-                </button>
-                <button
-                  type="submit"
-                  disabled={forgotLoading}
-                  className="px-5 py-2 rounded-full bg-[#e85200] hover:bg-[#d64800] text-white text-xs font-bold disabled:opacity-50"
-                >
-                  {forgotLoading ? 'Memproses...' : 'Kirim Pemulihan'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   )
 }
