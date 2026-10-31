@@ -76,10 +76,10 @@ export default function Navbar() {
             <div className="hidden sm:flex items-center gap-3">
               <Link
                 href="/account"
-                className={`text-xs font-medium transition ${
+                className={`px-4 py-1.5 rounded-full text-xs font-semibold shadow-sm border max-w-[140px] truncate transition ${
                   pathname === '/account'
-                    ? 'text-zinc-900 font-bold'
-                    : 'text-zinc-600 hover:text-zinc-900'
+                    ? 'bg-zinc-900 text-white border-zinc-900'
+                    : 'bg-white text-zinc-700 border-zinc-300 hover:bg-zinc-100'
                 }`}
               >
                 {session.user?.name || session.user?.email?.split('@')[0]}

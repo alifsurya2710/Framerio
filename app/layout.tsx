@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import './globals.css'
 import Providers from './providers'
 import Navbar from '@/components/Navbar'
@@ -13,12 +13,15 @@ export const metadata: Metadata = {
     icon: '/icon.png',
     apple: '/icon.png'
   },
-  themeColor: '#e85200',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
     title: 'Framerio'
   }
+}
+
+export const viewport: Viewport = {
+  themeColor: '#e85200'
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

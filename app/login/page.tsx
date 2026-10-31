@@ -167,6 +167,12 @@ export default function LoginPage() {
             </div>
           </div>
 
+          <div className="text-right -mt-2">
+            <Link href="/forgot-password" className="text-[11px] text-[#e85200] hover:underline font-bold">
+              Lupa kata sandi?
+            </Link>
+          </div>
+
           <MathCaptcha onValidate={setCaptchaValid} />
 
           <button

@@ -106,7 +106,7 @@ export default function AdminTemplatesPage() {
   })
 
   return (
-    <div className="p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
+    <div className="max-w-7xl mx-auto space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -129,7 +129,7 @@ export default function AdminTemplatesPage() {
       </div>
 
       {/* Filter Tabs */}
-      <div className="flex items-center gap-2 bg-[#b8b7b2] p-1 rounded-xl shadow-inner text-xs font-bold text-zinc-700 w-fit">
+      <div className="flex flex-wrap items-center gap-2 bg-[#b8b7b2] p-1 rounded-xl shadow-inner text-xs font-bold text-zinc-700 w-fit">
         <button
           onClick={() => setFilter('all')}
           className={`px-3 py-1.5 rounded-lg transition-all ${

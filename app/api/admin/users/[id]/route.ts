@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import bcrypt from 'bcryptjs'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { validatePassword } from '@/lib/password'
 
 async function requireAdmin() {
   const session = await getServerSession(authOptions)
@@ -71,8 +72,9 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     }
 
     if (body.password) {
-      if (String(body.password).length < 8) {
-        return NextResponse.json({ error: 'Password minimal 8 karakter' }, { status: 400 })
+      const pwError = validatePassword(String(body.password))
+      if (pwError) {
+        return NextResponse.json({ error: pwError }, { status: 400 })
       }
       data.password = await bcrypt.hash(body.password, 10)
     }

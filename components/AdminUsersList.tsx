@@ -1,5 +1,6 @@
 'use client'
 import { useState } from 'react'
+import { PASSWORD_RULES, validatePassword } from '@/lib/password'
 
 export type AdminUserRow = {
   id: string
@@ -71,6 +72,16 @@ export default function AdminUsersList({
     e.preventDefault()
     setLoading(true)
     setError('')
+
+    // Validasi password: wajib untuk create, opsional (tapi harus valid) untuk edit
+    if (form.password || modal === 'create') {
+      const pwError = validatePassword(form.password)
+      if (pwError) {
+        setError(pwError)
+        setLoading(false)
+        return
+      }
+    }
 
     const payload: Record<string, unknown> = {
       name: form.name,
@@ -248,7 +259,7 @@ export default function AdminUsersList({
           onClick={() => !loading && setModal(null)}
         >
           <div
-            className="relative bg-[#ecebe6] rounded-[28px] border-2 border-white shadow-2xl overflow-hidden max-w-md w-full"
+            className="relative bg-[#ecebe6] rounded-[28px] border-2 border-white shadow-2xl overflow-x-hidden overflow-y-auto max-h-[90vh] max-w-md w-full"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="px-5 py-4 border-b border-zinc-300 flex items-center justify-between">
@@ -302,8 +313,33 @@ export default function AdminUsersList({
                   value={form.password}
                   onChange={(e) => setForm({ ...form, password: e.target.value })}
                   className="mt-1 w-full bg-white border border-zinc-300 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#e85200]/40"
-                  placeholder="Min. 8 karakter"
+                  placeholder="Min. 8 karakter, ada A-Z, a-z, 0-9, @$!%*?&"
                 />
+                {/* Checklist syarat password */}
+                {form.password.length > 0 && (
+                  <ul className="mt-2 space-y-1">
+                    {PASSWORD_RULES.map((rule) => {
+                      const ok = rule.test(form.password)
+                      return (
+                        <li
+                          key={rule.id}
+                          className={`flex items-center gap-1.5 text-[10px] font-semibold ${
+                            ok ? 'text-green-600' : 'text-zinc-400'
+                          }`}
+                        >
+                          <span
+                            className={`w-3.5 h-3.5 rounded-full flex items-center justify-center text-[8px] font-black flex-shrink-0 ${
+                              ok ? 'bg-green-500 text-white' : 'bg-zinc-200 text-zinc-400'
+                            }`}
+                          >
+                            {ok ? '✓' : '✕'}
+                          </span>
+                          {rule.label}
+                        </li>
+                      )
+                    })}
+                  </ul>
+                )}
               </label>
 
               <div className="grid grid-cols-2 gap-3">

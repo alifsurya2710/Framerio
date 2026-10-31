@@ -271,17 +271,37 @@ export default function Home() {
         </div>
       )}
 
-      {/* Footer info dengan kredit Alif Surya */}
-      <footer className="mt-6 text-center text-xs text-zinc-600 font-medium flex flex-wrap items-center justify-center gap-1.5 sm:gap-2">
+      {/* Footer info dengan kontak kerja sama (Gmail & Instagram) */}
+      <footer className="mt-6 text-center text-xs text-zinc-600 font-medium flex flex-wrap items-center justify-center gap-x-2 gap-y-1.5">
         <span>&copy; 2026 Framerio Studio &bull; Pengalaman Photobooth Bergaya Konsol Saku &bull;</span>
-        <span>Dibuat oleh</span>
+        <span>Mau Bekerja Sama? Hubungi:</span>
+        <a
+          href="mailto:mmochalifsuryaramadhan@gmail.com"
+          className="font-bold text-[#e85200] hover:underline transition-colors inline-flex items-center gap-1.5"
+          title="Kirim email ke mmochalifsuryaramadhan@gmail.com"
+        >
+          {/* Ikon Gmail (amplop) */}
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#EA4335" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <rect x="2" y="4" width="20" height="16" rx="2" />
+            <path d="m22 7-8.97 5.7a1.94 1.94 0 0 0-2.06 0L2 7" />
+          </svg>
+          mmochalifsuryaramadhan@gmail.com
+        </a>
+        <span>&bull;</span>
         <a
           href="https://www.instagram.com/mochalifsurya/?__pwa=1"
           target="_blank"
           rel="noopener noreferrer"
-          className="font-bold text-[#e85200] hover:underline transition-colors inline-flex items-center gap-1"
+          className="font-bold text-[#e85200] hover:underline transition-colors inline-flex items-center gap-1.5"
+          title="Instagram @mochalifsurya"
         >
-          Alif Surya &rarr;
+          {/* Ikon Instagram */}
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#E4405F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+            <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+            <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+          </svg>
+          @mochalifsurya
         </a>
       </footer>
     </div>

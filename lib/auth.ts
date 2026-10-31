@@ -35,10 +35,21 @@ export const authOptions: NextAuthOptions = {
     })
   ],
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
+      // Saat user edit profil sendiri, sinkronkan nama & email di token
+      // (dikirim lewat useSession().update() dari halaman akun).
+      if (trigger === 'update' && session) {
+        token.name = (session as any).name ?? token.name
+        token.email = (session as any).email ?? token.email
+      }
       if (user) token.role = (user as any).role
-      if (token.sub) {
-        const dbUser = await prisma.user.findUnique({ where: { id: token.sub } })
+      // Hanya query DB jika token belum punya role (mis. token lama dari sebelum upgrade).
+      // Ini mencegah 1 query DB setiap request yang bisa menguras connection pool.
+      if (token.role === undefined && token.sub) {
+        const dbUser = await prisma.user.findUnique({
+          where: { id: token.sub },
+          select: { role: true },
+        })
         if (dbUser) token.role = dbUser.role
       }
       return token

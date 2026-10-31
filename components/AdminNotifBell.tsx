@@ -99,7 +99,7 @@ export default function AdminNotifBell() {
 
       {/* Dropdown */}
       {open && (
-        <div className="absolute right-0 top-11 w-80 bg-[#1e1e1e] border border-zinc-700 rounded-2xl shadow-2xl z-50 overflow-hidden">
+        <div className="absolute right-0 top-11 w-80 max-w-[calc(100vw-1.5rem)] bg-[#1e1e1e] border border-zinc-700 rounded-2xl shadow-2xl z-50 overflow-hidden">
           {/* Header */}
           <div className="px-4 py-3 border-b border-zinc-700 flex items-center justify-between">
             <span className="text-xs font-black text-white tracking-wide">Notifikasi</span>

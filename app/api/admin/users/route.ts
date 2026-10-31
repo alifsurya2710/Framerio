@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import bcrypt from 'bcryptjs'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { validatePassword } from '@/lib/password'
 
 async function requireAdmin() {
   const session = await getServerSession(authOptions)
@@ -42,8 +43,12 @@ export async function POST(req: Request) {
     if (!trimmedEmail || !trimmedEmail.includes('@')) {
       return NextResponse.json({ error: 'Format email tidak valid' }, { status: 400 })
     }
-    if (!password || password.length < 8) {
-      return NextResponse.json({ error: 'Password minimal 8 karakter' }, { status: 400 })
+    if (!password) {
+      return NextResponse.json({ error: 'Password wajib diisi' }, { status: 400 })
+    }
+    const pwError = validatePassword(String(password))
+    if (pwError) {
+      return NextResponse.json({ error: pwError }, { status: 400 })
     }
     if (role && !['USER', 'ADMIN'].includes(role)) {
       return NextResponse.json({ error: 'Role tidak valid' }, { status: 400 })

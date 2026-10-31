@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import DeleteAccountForm from '@/components/DeleteAccountForm'
+import AccountEditForm from '@/components/AccountEditForm'
 
 export default async function AccountPage() {
   const session = await getServerSession(authOptions)
@@ -36,8 +37,11 @@ export default async function AccountPage() {
 
       <div className="space-y-3">
         <div className="retro-canvas rounded-[24px] border-2 border-white/60 p-5 shadow-md">
-          <div className="text-[9px] font-mono tracking-widest text-zinc-500 uppercase mb-4">
-            Profil
+          <div className="flex items-center justify-between mb-4">
+            <div className="text-[9px] font-mono tracking-widest text-zinc-500 uppercase">
+              Profil
+            </div>
+            {isUser && <AccountEditForm initialName={user.name || ''} initialEmail={user.email} />}
           </div>
           <div className="flex items-center gap-3 mb-4">
             <div className="w-11 h-11 rounded-2xl bg-zinc-800 text-white flex items-center justify-center text-sm font-black">
