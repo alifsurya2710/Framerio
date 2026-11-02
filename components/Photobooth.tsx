@@ -392,6 +392,28 @@ const TEMPLATES: Template[] = [
 /* ════════════════════════════════════════════════════════════
    CANVAS COMPOSE ENGINE (MENDUKUNG DETAIL TIAP STYLE)
 ════════════════════════════════════════════════════════════ */
+/* ════════════════════════════════════════════════════════
+   COVER-CROP: gambar foto penuh tanpa gepeng/lonjong
+   (potong sisi yang berlebih, bukan merenggangkan rasio)
+════════════════════════════════════════════════════════════ */
+function drawCover(
+  ctx: CanvasRenderingContext2D,
+  img: HTMLImageElement,
+  dx: number, dy: number, dw: number, dh: number
+) {
+  const imgRatio = img.naturalWidth / img.naturalHeight
+  const cellRatio = dw / dh
+  let sx = 0, sy = 0, sw = img.naturalWidth, sh = img.naturalHeight
+  if (imgRatio > cellRatio) {
+    sw = sh * cellRatio
+    sx = (img.naturalWidth - sw) / 2
+  } else {
+    sh = sw / cellRatio
+    sy = (img.naturalHeight - sh) / 2
+  }
+  ctx.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh)
+}
+
 async function composeLayout(
   imgs64: string[],
   layout: Layout | string,
@@ -826,6 +848,10 @@ async function composeLayout(
     else if (count === 3) { cw = 480; ch = 980 }
     else { cw = 480; ch = 1220 }
 
+    // Render 2x resolusi agar hasil tajam & tidak pecah di layar HP
+    const S = 2
+    cw *= S; ch *= S
+
     canvas.width = cw; canvas.height = ch
     ctx.fillStyle = tpl.bg || '#ffffff'
     ctx.fillRect(0, 0, cw, ch)
@@ -845,10 +871,11 @@ async function composeLayout(
       }
     }
 
-    const labelH = 80
-    const margin = Math.max(tpl.pad || 16, 16)
-    const gapSize = tpl.gap || 12
-    const radius = tpl.rounded || 12
+    const labelH = 80 * S
+    const margin = Math.max(tpl.pad || 16, 16) * S
+    const gapSize = (tpl.gap || 12) * S
+    const radius = (tpl.rounded || 12) * S
+    const frameW = (tpl.frameWidth && tpl.frameWidth > 0 ? tpl.frameWidth : 0) * S
 
     if (count > 4) {
       const cols = 2
@@ -865,12 +892,12 @@ async function composeLayout(
         ctx.beginPath()
         ctx.roundRect(px, py, cellW, cellH, radius)
         ctx.clip()
-        ctx.drawImage(img, px, py, cellW, cellH)
+        drawCover(ctx, img, px, py, cellW, cellH)
         ctx.restore()
 
-        if (tpl.frameWidth && tpl.frameWidth > 0) {
+        if (frameW > 0) {
           ctx.strokeStyle = tpl.frame || '#000'
-          ctx.lineWidth = tpl.frameWidth
+          ctx.lineWidth = frameW
           ctx.beginPath()
           ctx.roundRect(px, py, cellW, cellH, radius)
           ctx.stroke()
@@ -887,12 +914,12 @@ async function composeLayout(
         ctx.beginPath()
         ctx.roundRect(margin, py, cellW, cellH, radius)
         ctx.clip()
-        ctx.drawImage(img, margin, py, cellW, cellH)
+        drawCover(ctx, img, margin, py, cellW, cellH)
         ctx.restore()
 
-        if (tpl.frameWidth && tpl.frameWidth > 0) {
+        if (frameW > 0) {
           ctx.strokeStyle = tpl.frame || '#000'
-          ctx.lineWidth = tpl.frameWidth
+          ctx.lineWidth = frameW
           ctx.beginPath()
           ctx.roundRect(margin, py, cellW, cellH, radius)
           ctx.stroke()
@@ -902,12 +929,12 @@ async function composeLayout(
 
     // Label & Subtext
     ctx.fillStyle = tpl.textColor || '#111827'
-    ctx.font = 'bold 22px sans-serif'
+    ctx.font = `bold ${22 * S}px sans-serif`
     ctx.textAlign = 'center'
-    ctx.fillText(tpl.labelText || 'Framerio Memories', cw / 2, ch - 42)
+    ctx.fillText(tpl.labelText || 'Framerio Memories', cw / 2, ch - 42 * S)
     if (tpl.subText) {
-      ctx.font = '12px sans-serif'
-      ctx.fillText(tpl.subText, cw / 2, ch - 22)
+      ctx.font = `${12 * S}px sans-serif`
+      ctx.fillText(tpl.subText, cw / 2, ch - 22 * S)
     }
 
     return canvas.toDataURL('image/jpeg', 0.95)
@@ -922,7 +949,7 @@ async function composeLayout(
 
   imgs.slice(0, count).forEach((img, i) => {
     const iy = fw + pad + i * (photoH + gap)
-    ctx.drawImage(img, fw + pad, iy, cw - (fw + pad) * 2, photoH)
+    drawCover(ctx, img, fw + pad, iy, cw - (fw + pad) * 2, photoH)
   })
 
   ctx.fillStyle = tpl.textColor
@@ -1171,6 +1198,9 @@ export default function Photobooth({ allowed }: { allowed: boolean }) {
   const [shots,     setShots]     = useState<string[]>([])
   const [capturing, setCapturing] = useState(false)
   const [countdown, setCountdown] = useState<number | null>(null)
+  // Timer hitung mundur sebelum foto: 0 = tanpa timer, bebas disetel 1-60 detik
+  const [timerSec, setTimerSec] = useState<number>(5)
+  const [customSec, setCustomSec] = useState<string>('')
   const [result,    setResult]    = useState<string | null>(null)
   const [saved,     setSaved]     = useState(false)
   const [saving,    setSaving]    = useState(false)
@@ -1337,7 +1367,7 @@ export default function Photobooth({ allowed }: { allowed: boolean }) {
     const collected: string[] = []
 
     for (let i = 0; i < total; i++) {
-      for (let c = 5; c >= 1; c--) {
+      for (let c = timerSec; c >= 1; c--) {
         setCountdown(c)
         await sleep(1000)
       }
@@ -1462,6 +1492,53 @@ export default function Photobooth({ allowed }: { allowed: boolean }) {
                   {Array.from({ length: targetPhotoCount }).map((_, i) => (
                     <div key={i} className={`w-2.5 h-2.5 rounded-full transition-all ${i < shots.length ? 'bg-[#e85200]' : 'bg-white/40'}`} />
                   ))}
+                </div>
+              </div>
+
+              {/* Pilih Timer */}
+              <div className="flex items-center gap-1.5 mt-2.5 flex-wrap">
+                <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">⏱ Timer:</span>
+                {([3, 5, 0] as const).map(sec => (
+                  <button
+                    key={sec}
+                    type="button"
+                    onClick={() => { setTimerSec(sec); setCustomSec('') }}
+                    disabled={capturing}
+                    className={`px-3 py-1.5 rounded-full text-[10px] font-bold transition border ${
+                      timerSec === sec
+                        ? 'bg-zinc-900 text-white border-zinc-900 shadow-sm'
+                        : 'bg-white/70 hover:bg-white text-zinc-700 border-zinc-300'
+                    }`}
+                  >
+                    {sec === 0 ? 'Tanpa Timer' : `${sec} Detik`}
+                  </button>
+                ))}
+                {/* Setel detik bebas (1-60) — untuk user maupun admin */}
+                <div className={`flex items-center gap-1 px-2 py-1 rounded-full border transition ${
+                  ![0, 3, 5].includes(timerSec)
+                    ? 'bg-zinc-900 border-zinc-900'
+                    : 'bg-white/70 border-zinc-300'
+                }`}>
+                  <input
+                    type="number"
+                    min={1}
+                    max={60}
+                    value={customSec}
+                    disabled={capturing}
+                    onChange={(e) => {
+                      const v = e.target.value
+                      setCustomSec(v)
+                      const n = parseInt(v, 10)
+                      if (!isNaN(n) && n >= 1 && n <= 60) setTimerSec(n)
+                    }}
+                    className={`w-11 bg-transparent text-[10px] font-bold text-center focus:outline-none ${
+                      ![0, 3, 5].includes(timerSec) ? 'text-white placeholder:text-zinc-400' : 'text-zinc-700'
+                    }`}
+                    placeholder="detik"
+                  />
+                  <span className={`text-[9px] font-bold ${
+                    ![0, 3, 5].includes(timerSec) ? 'text-white' : 'text-zinc-500'
+                  }`}>detik sendiri</span>
                 </div>
               </div>
 

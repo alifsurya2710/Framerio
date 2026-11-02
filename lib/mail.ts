@@ -22,12 +22,15 @@ export async function sendMail(opts: { to: string; subject: string; html: string
     auth: { user, pass },
   })
 
-  await transporter.sendMail({
+  const info = await transporter.sendMail({
     from: process.env.MAIL_FROM || `"Framerio" <${user}>`,
     to: opts.to,
     subject: opts.subject,
     html: opts.html,
   })
+
+  // Catat keberhasilan kirim agar mudah ditelusuri saat debugging
+  console.log('[mail] terkirim ->', opts.to, '| messageId:', info.messageId)
 }
 
 /** Bangun URL aplikasi — APP_URL lebih diutamakan, fallback ke NEXTAUTH_URL / origin request. */
