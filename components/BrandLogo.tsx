@@ -15,8 +15,8 @@ export default function BrandLogo({
 }: BrandLogoProps) {
   return (
     <Image
-      src="/framerio-logo.png"
-      alt="Framerio"
+      src="/framerphotobooth-logo.png"
+      alt="FramerPhotobooth"
       width={width}
       height={height}
       className={className}

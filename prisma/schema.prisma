@@ -18,6 +18,7 @@ model User {
   photos        Photo[]
   subscriptions Subscription[]
   customTemplates CustomTemplate[]
+  testimonies   Testimony[]
 }
 
 enum Role {
@@ -54,7 +55,7 @@ model Subscription {
 
 model Notification {
   id        String   @id @default(cuid())
-  type      String   // 'proof_submitted' | 'payment_approved' | 'payment_rejected'
+  type      String   // 'proof_submitted' | 'payment_approved' | 'payment_rejected' | 'testimony_submitted'
   title     String
   body      String
   read      Boolean  @default(false)
@@ -85,7 +86,7 @@ model CustomTemplate {
   pad               Int      @default(16)
   textColor         String   @default("#1c1c1c")
   labelText         String   @default("My Memories")
-  subText           String   @default("FRAMERIO PHOTOBOOTH")
+  subText           String   @default("FRAMERPHOTOBOOTH")
   filter            String   @default("none")
   styleType         String   @default("custom")
   bgImage           String?  @db.Text
@@ -119,4 +120,20 @@ enum SubscriptionStatus {
   PAID
   REJECTED
   EXPIRED
+}
+
+// Testimoni user tentang website — dinilai bintang 1-5 + tanggal,
+// lalu di-approve / reject oleh admin sebelum tampil di beranda.
+model Testimony {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  rating    Int      // 1 - 5 bintang
+  date      DateTime // tanggal yang diisi user
+  message   String   @db.Text
+  status    String   @default("PENDING") // PENDING | APPROVED | REJECTED
+  createdAt DateTime @default(now())
+
+  @@index([status])
+  @@index([userId])
 }

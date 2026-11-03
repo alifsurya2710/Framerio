@@ -3,6 +3,7 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import GalleryDeleteButton from '@/components/GalleryDeleteButton'
 
 export default async function GalleryPage() {
   const session = await getServerSession(authOptions)
@@ -36,7 +37,7 @@ export default async function GalleryPage() {
           </div>
           <h2 className="text-base font-black text-zinc-800 mb-1">Belum Ada Foto</h2>
           <p className="text-xs text-zinc-500 mb-6 max-w-xs mx-auto">
-            Yuk ambil foto pertamamu di studio Framerio dan simpan ke galeri.
+            Yuk ambil foto pertamamu di studio FramerPhotobooth dan simpan ke galeri.
           </p>
           <Link
             href="/booth"
@@ -75,11 +76,13 @@ export default async function GalleryPage() {
                 </div>
                 <a
                   href={p.imageData}
-                  download={`framerio-${p.id}.jpg`}
+                  download={`framerphotobooth-${p.id}.jpg`}
                   className="block w-full text-center text-[10px] font-bold py-2 rounded-xl bg-zinc-800 hover:bg-[#e85200] text-white transition-colors"
                 >
                   ↓ Unduh
                 </a>
+                {/* User bisa menghapus fotonya sendiri tanpa perlu admin */}
+                <GalleryDeleteButton id={p.id} />
               </div>
             </div>
           ))}

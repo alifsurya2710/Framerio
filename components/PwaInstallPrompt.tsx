@@ -94,13 +94,13 @@ export default function PwaInstallPrompt() {
               <div className="w-14 h-14 rounded-2xl bg-[#ff5e00] flex-shrink-0 flex items-center justify-center shadow-md p-1.5 overflow-hidden">
                 <img
                   src="/icon.png"
-                  alt="Framerio App Icon"
+                  alt="FramerPhotobooth App Icon"
                   className="w-full h-full object-contain rounded-xl"
                 />
               </div>
               <div className="flex flex-col">
                 <h3 className="text-sm font-extrabold text-zinc-900 leading-tight">
-                  Pasang Framerio di HP Anda seperti aplikasi biasa?
+                  Pasang FramerPhotobooth di HP Anda seperti aplikasi biasa?
                 </h3>
                 <p className="text-xs text-zinc-500 mt-1.5 leading-relaxed font-medium">
                   Buka lebih cepat dari layar utama, tanpa repot buka browser.

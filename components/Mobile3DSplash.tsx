@@ -57,10 +57,10 @@ export default function Mobile3DSplash() {
           <div className="w-full h-full rounded-2xl bg-white/20 p-1 flex items-center justify-center overflow-hidden">
             <img
               src="/icon.png"
-              alt="Framerio Logo"
+              alt="FramerPhotobooth Logo"
               className="w-full h-full object-contain drop-shadow-md"
               onError={(e) => {
-                (e.target as any).src = '/framerio-logo.png'
+                (e.target as any).src = '/framerphotobooth-logo.png'
               }}
             />
           </div>
@@ -76,7 +76,7 @@ export default function Mobile3DSplash() {
               +
             </span>
             <span className="font-black text-xl tracking-[0.25em] text-zinc-900 uppercase">
-              FRAMERIO
+              FRAMERPHOTOBOOTH
             </span>
           </div>
           <span className="text-[10px] font-mono font-bold tracking-widest text-[#e85200] mt-1.5 uppercase">

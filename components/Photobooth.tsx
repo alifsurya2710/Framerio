@@ -143,7 +143,7 @@ const TEMPLATES: Template[] = [
     gap: 14,
     pad: 22,
     textColor: '#bae6fd',
-    labelText: 'framerio booth',
+    labelText: 'framerphotobooth booth',
     subText: 'SAFARI POLKADOT',
     filter: 'contrast(106%) saturate(110%)',
     styleType: 'polkadot-brown'
@@ -166,7 +166,7 @@ const TEMPLATES: Template[] = [
     gap: 14,
     pad: 22,
     textColor: '#ffffff',
-    labelText: 'framerio booth',
+    labelText: 'framerphotobooth booth',
     subText: 'VINTAGE LACE EDITION',
     filter: 'contrast(108%) saturate(105%)',
     styleType: 'polkadot-blue-lace'
@@ -213,7 +213,7 @@ const TEMPLATES: Template[] = [
     pad: 12,
     textColor: '#64748b',
     labelText: 'COUPLE MOMENTS',
-    subText: 'FRAMERIO MEMORIES',
+    subText: 'FRAMERPHOTOBOOTH MEMORIES',
     filter: 'none',
     styleType: 'couple-minimal'
   },
@@ -235,7 +235,7 @@ const TEMPLATES: Template[] = [
     gap: 12,
     pad: 20,
     textColor: '#854d0e',
-    labelText: 'BATIK FRAMERIO',
+    labelText: 'BATIK FRAMERPHOTOBOOTH',
     subText: 'NUSANTARA HERITAGE',
     filter: 'sepia(15%) contrast(105%)',
     styleType: 'batik'
@@ -287,7 +287,7 @@ const TEMPLATES: Template[] = [
     pad: 0,
     textColor: '#ffffff',
     labelText: 'Polaroid Memories',
-    subText: 'FRAMERIO × ONE STEP 2',
+    subText: 'FRAMERPHOTOBOOTH × ONE STEP 2',
     filter: 'none',
     styleType: 'bgimage-strip4'
   },
@@ -335,7 +335,7 @@ const TEMPLATES: Template[] = [
     pad: 0,
     textColor: '#ffffff',
     labelText: 'My Receiptify',
-    subText: 'LAST MONTH • FRAMERIO',
+    subText: 'LAST MONTH • FRAMERPHOTOBOOTH',
     filter: 'none',
     styleType: 'bgimage-strip4'
   },
@@ -359,7 +359,7 @@ const TEMPLATES: Template[] = [
     pad: 0,
     textColor: '#5c3d1e',
     labelText: 'My Girl ♥ Love',
-    subText: 'FRAMERIO × POLAROID',
+    subText: 'FRAMERPHOTOBOOTH × POLAROID',
     filter: 'sepia(10%) warmth(5%)',
     styleType: 'bgimage-strip3'
   },
@@ -383,7 +383,7 @@ const TEMPLATES: Template[] = [
     pad: 0,
     textColor: '#f0e6d0',
     labelText: 'cool memories',
-    subText: 'GOT HITCHED • FRAMERIO',
+    subText: 'GOT HITCHED • FRAMERPHOTOBOOTH',
     filter: 'none',
     styleType: 'bgimage-strip2'
   }
@@ -537,7 +537,7 @@ async function composeLayout(
 
     // Footer Tiket
     ctx.font = 'bold 13px monospace'
-    ctx.fillText('♥ JUST MOMENT • FRAMERIO TICKET ♥', cw / 2, ch - 30)
+    ctx.fillText('♥ JUST MOMENT • FRAMERPHOTOBOOTH TICKET ♥', cw / 2, ch - 30)
     return canvas.toDataURL('image/jpeg', 0.95)
   }
 
@@ -579,7 +579,7 @@ async function composeLayout(
     ctx.fillText('⛵ 🐶 🐰 ✨', cw / 2, ch - 80)
     ctx.font = 'bold 14px monospace'
     ctx.fillStyle = '#64748b'
-    ctx.fillText('SAILING IN DREAMS • FRAMERIO', cw / 2, ch - 35)
+    ctx.fillText('SAILING IN DREAMS • FRAMERPHOTOBOOTH', cw / 2, ch - 35)
     return canvas.toDataURL('image/jpeg', 0.95)
   }
 
@@ -597,7 +597,7 @@ async function composeLayout(
     // Header Koran
     ctx.font = 'bold 13px serif'
     ctx.fillStyle = '#1c1917'
-    ctx.fillText('SPECIAL EDITION  •  NEWS PHOTOBOOTH BY FRAMERIO  •  SPECIAL EDITION', cw / 2, 45)
+    ctx.fillText('SPECIAL EDITION  •  NEWS PHOTOBOOTH BY FRAMERPHOTOBOOTH  •  SPECIAL EDITION', cw / 2, 45)
     ctx.beginPath(); ctx.moveTo(25, 58); ctx.lineTo(cw - 25, 58); ctx.stroke()
 
     // Judul Besar Koran
@@ -688,11 +688,11 @@ async function composeLayout(
       ctx.stroke()
     })
 
-    // Watermark Logo Safari Framerio
+    // Watermark Logo Safari FramerPhotobooth
     ctx.fillStyle = '#ffffff'
     ctx.font = 'bold 22px -apple-system, sans-serif'
     ctx.textAlign = 'center'
-    ctx.fillText('framerio safari booth', cw / 2, ch - 35)
+    ctx.fillText('framerphotobooth safari booth', cw / 2, ch - 35)
 
     return canvas.toDataURL('image/jpeg', 0.95)
   }
@@ -751,7 +751,7 @@ async function composeLayout(
     ctx.fillStyle = '#ffffff'
     ctx.font = 'bold 22px -apple-system, sans-serif'
     ctx.textAlign = 'center'
-    ctx.fillText('framerio safari booth • blue lace', cw / 2, ch - 35)
+    ctx.fillText('framerphotobooth safari booth • blue lace', cw / 2, ch - 35)
 
     return canvas.toDataURL('image/jpeg', 0.95)
   }
@@ -792,7 +792,7 @@ async function composeLayout(
     ctx.fillStyle = '#854d0e'
     ctx.font = 'bold 18px serif'
     ctx.textAlign = 'center'
-    ctx.fillText('BATIK NUSANTARA • FRAMERIO HERITAGE', cw / 2, ch - 20)
+    ctx.fillText('BATIK NUSANTARA • FRAMERPHOTOBOOTH HERITAGE', cw / 2, ch - 20)
     return canvas.toDataURL('image/jpeg', 0.95)
   }
 
@@ -872,8 +872,10 @@ async function composeLayout(
     }
 
     const labelH = 80 * S
-    const margin = Math.max(tpl.pad || 16, 16) * S
-    const gapSize = (tpl.gap || 12) * S
+    // Margin & gap diperbesar agar desain template tidak tertutup foto kolase
+    // (template adalah nilai utama hasil — harus terlihat jelas di sekeliling foto).
+    const margin = Math.max(tpl.pad || 40, 40) * S
+    const gapSize = Math.max(tpl.gap || 24, 24) * S
     const radius = (tpl.rounded || 12) * S
     const frameW = (tpl.frameWidth && tpl.frameWidth > 0 ? tpl.frameWidth : 0) * S
 
@@ -931,7 +933,7 @@ async function composeLayout(
     ctx.fillStyle = tpl.textColor || '#111827'
     ctx.font = `bold ${22 * S}px sans-serif`
     ctx.textAlign = 'center'
-    ctx.fillText(tpl.labelText || 'Framerio Memories', cw / 2, ch - 42 * S)
+    ctx.fillText(tpl.labelText || 'FramerPhotobooth Memories', cw / 2, ch - 42 * S)
     if (tpl.subText) {
       ctx.font = `${12 * S}px sans-serif`
       ctx.fillText(tpl.subText, cw / 2, ch - 22 * S)
@@ -1061,7 +1063,7 @@ function CollagePreview({ shots, tpl, size = 'md' }: {
             </div>
           ))}
         </div>
-        <div className="text-center text-[7px] font-bold text-[#bae6fd] pt-1 z-10">framerio safari</div>
+        <div className="text-center text-[7px] font-bold text-[#bae6fd] pt-1 z-10">framerphotobooth safari</div>
       </div>
     )
   }
@@ -1395,7 +1397,7 @@ export default function Photobooth({ allowed }: { allowed: boolean }) {
     if (!result) return
     const win = window.open('', '_blank')
     if (!win) { alert('Izinkan popup browser untuk mencetak foto'); return }
-    win.document.write(`<!doctype html><html><head><title>Print Framerio</title>
+    win.document.write(`<!doctype html><html><head><title>Print FramerPhotobooth</title>
       <style>
         @page { margin: 0; }
         body { margin: 0; display: flex; align-items: center; justify-content: center; min-height: 100vh; background: #fff; }
@@ -1411,7 +1413,7 @@ export default function Photobooth({ allowed }: { allowed: boolean }) {
     if (!result) return
     const a = document.createElement('a')
     a.href = result
-    a.download = `framerio-${template.id}-${Date.now()}.jpg`
+    a.download = `framerphotobooth-${template.id}-${Date.now()}.jpg`
     a.click()
   }
 

@@ -76,7 +76,7 @@ export default function AdminPhotoGrid({ photos }: { photos: Photo[] }) {
               <div className="flex items-center gap-1.5 pt-1">
                 <a
                   href={p.imageData}
-                  download={`framerio-${p.id}.jpg`}
+                  download={`framerphotobooth-${p.id}.jpg`}
                   className="flex-1 text-center text-[10px] font-bold py-1.5 rounded-lg bg-white/60 hover:bg-white text-zinc-700 border border-zinc-300 transition"
                 >
                   ↓ Unduh
@@ -119,7 +119,7 @@ export default function AdminPhotoGrid({ photos }: { photos: Photo[] }) {
             <div className="px-5 pb-5 flex gap-2">
               <a
                 href={preview.imageData}
-                download={`framerio-${preview.id}.jpg`}
+                download={`framerphotobooth-${preview.id}.jpg`}
                 className="flex-1 text-center text-xs font-bold py-2.5 rounded-xl bg-zinc-800 text-white hover:bg-zinc-700 transition"
               >
                 ↓ Unduh Foto

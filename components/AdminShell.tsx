@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import AdminNotifBell from '@/components/AdminNotifBell'
+import TestimonyPopup from '@/components/TestimonyPopup'
 import BrandLogo from '@/components/BrandLogo'
 
 const navItems = [
@@ -11,6 +12,7 @@ const navItems = [
   { href: '/admin/templates', label: 'Kelola Template', icon: '▣' },
   { href: '/admin/users', label: 'Users', icon: '◎' },
   { href: '/admin/subscriptions', label: 'Subscriptions', icon: '◇' },
+  { href: '/admin/testimonies', label: 'Testimoni', icon: '★' },
 ]
 
 function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
@@ -151,6 +153,9 @@ export default function AdminShell({ email, children }: { email: string; childre
 
         <main className="flex-1 p-4 sm:p-6 lg:p-8">{children}</main>
       </div>
+
+      {/* Pop-up tengah saat ada testimoni baru masuk */}
+      <TestimonyPopup />
     </div>
   )
 }

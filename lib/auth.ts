@@ -2,9 +2,10 @@ import { NextAuthOptions } from 'next-auth'
 import Credentials from 'next-auth/providers/credentials'
 import bcrypt from 'bcryptjs'
 import { prisma } from './prisma'
+import { AUTH_SECRET } from './authSecret'
 
 export const authOptions: NextAuthOptions = {
-  secret: process.env.NEXTAUTH_SECRET || 'framerio-secret-fallback-key-2026',
+  secret: AUTH_SECRET,
   session: { strategy: 'jwt' },
   pages: { signIn: '/login' },
   providers: [

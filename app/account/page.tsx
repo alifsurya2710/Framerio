@@ -32,7 +32,7 @@ export default async function AccountPage() {
           Pengaturan
         </div>
         <h1 className="text-2xl sm:text-3xl font-black text-zinc-900 tracking-tight">Akun Saya</h1>
-        <p className="text-xs text-zinc-500 mt-1">Kelola informasi dan keamanan akun Framerio.</p>
+        <p className="text-xs text-zinc-500 mt-1">Kelola informasi dan keamanan akun FramerPhotobooth.</p>
       </div>
 
       <div className="space-y-3">

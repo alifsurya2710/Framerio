@@ -55,7 +55,7 @@ export async function POST(req: Request) {
     try {
       await sendMail({
         to: email,
-        subject: 'Reset Kata Sandi Framerio',
+        subject: 'Reset Kata Sandi FramerPhotobooth',
         html: resetPasswordEmailHtml(link, TOKEN_TTL_MINUTES),
       })
     } catch (mailErr) {

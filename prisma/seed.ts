@@ -5,7 +5,7 @@ const prisma = new PrismaClient()
 
 async function main() {
   const email = process.env.ADMIN_EMAIL || 'admin@framerio.com'
-  const name = process.env.ADMIN_NAME || 'adminframerio'
+  const name = process.env.ADMIN_NAME || 'adminframerphotobooth'
   const password = process.env.ADMIN_PASSWORD || 'admin12345'
   const hash = await bcrypt.hash(password, 10)
 

@@ -87,7 +87,7 @@ export default function PricingPage() {
     <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 py-10 sm:py-16">
       <div className="text-center mb-10">
         <span className="px-3.5 py-1 rounded-full bg-[#e85200]/10 border border-[#e85200]/30 text-[#e85200] text-xs font-bold uppercase tracking-wider">
-          Langganan Premium Framerio
+          Langganan Premium FramerPhotobooth
         </span>
         <h1 className="text-3xl sm:text-5xl font-black text-zinc-900 mt-3 tracking-tight">
           Pilihan Paket Berlangganan

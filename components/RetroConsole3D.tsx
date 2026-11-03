@@ -63,7 +63,7 @@ export default function RetroConsole3D() {
                 FOTO
               </div>
               <span className="text-[11px] font-mono font-bold text-white tracking-widest mt-2 uppercase">
-                KAMERA FRAMERIO
+                KAMERA FRAMERPHOTOBOOTH
               </span>
               <span className="text-[9px] font-mono text-zinc-400 mt-0.5">
                 HITUNG MUNDUR 5 DETIK

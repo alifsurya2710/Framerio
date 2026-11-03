@@ -84,7 +84,7 @@ export default function AdminCreateTemplateModal({
           pad: 16,
           textColor: '#1c1c1c',
           labelText: name.trim(),
-          subText: 'FRAMERIO PHOTOBOOTH',
+          subText: 'FRAMERPHOTOBOOTH',
           filter: 'none',
           styleType: 'custom',
           isPublic

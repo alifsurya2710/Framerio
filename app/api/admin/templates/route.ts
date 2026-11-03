@@ -29,7 +29,7 @@ export async function POST(req: Request) {
         data: {
           id: session.user.id || undefined,
           email: adminEmail,
-          name: session.user.name || 'adminframerio',
+          name: session.user.name || 'adminframerphotobooth',
           password: hash,
           role: 'ADMIN',
           trialEndsAt: new Date(Date.now() + 365 * 86400000)
@@ -64,7 +64,7 @@ async function createTemplate(userId: string, body: any, isAdmin: boolean) {
     pad = 16,
     textColor = '#1c1c1c',
     labelText,
-    subText = 'FRAMERIO PHOTOBOOTH',
+    subText = 'FRAMERPHOTOBOOTH',
     filter = 'none',
     styleType = 'custom',
     bgImage = null,

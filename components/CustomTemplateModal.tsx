@@ -65,7 +65,7 @@ export default function CustomTemplateModal({
           bg: '#ffffff', bgImage,
           frame: '#000000', frameWidth: 0, rounded: 8, gap: 10, pad: 16,
           textColor: '#1c1c1c', labelText: name.trim(),
-          subText: 'FRAMERIO PHOTOBOOTH', filter: 'none', styleType: 'custom',
+          subText: 'FRAMERPHOTOBOOTH', filter: 'none', styleType: 'custom',
           isPublic: isAdmin ? isPublic : false
         })
       })

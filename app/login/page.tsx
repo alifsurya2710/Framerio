@@ -97,7 +97,7 @@ export default function LoginPage() {
             className="mx-auto mb-4 h-auto w-[184px]"
           />
           <h1 className="text-2xl sm:text-3xl font-black text-zinc-900 tracking-tight uppercase">
-            Masuk ke Framerio
+            Masuk ke FramerPhotobooth
           </h1>
           <p className="text-xs sm:text-sm text-zinc-600 mt-1 font-medium">
             Gunakan Username atau Email Anda

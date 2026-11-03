@@ -15,12 +15,19 @@ const TYPE_ICON: Record<string, string> = {
   proof_submitted: '💳',
   payment_approved: '✓',
   payment_rejected: '✕',
+  testimony_submitted: '★',
 }
 
 const TYPE_COLOR: Record<string, string> = {
   proof_submitted: 'bg-amber-50 border-amber-200',
   payment_approved: 'bg-green-50 border-green-200',
   payment_rejected: 'bg-red-50 border-red-200',
+  testimony_submitted: 'bg-orange-50 border-orange-200',
+}
+
+// Tujuan klik notifikasi per jenis (default: halaman subscription)
+const TYPE_LINK: Record<string, string> = {
+  testimony_submitted: '/admin/testimonies',
 }
 
 export default function AdminNotifBell() {
@@ -118,7 +125,7 @@ export default function AdminNotifBell() {
               notifs.map((n) => (
                 <a
                   key={n.id}
-                  href="/admin/subscriptions"
+                  href={TYPE_LINK[n.type] || '/admin/subscriptions'}
                   className={`px-4 py-3 flex gap-3 transition-colors hover:bg-white/5 ${
                     !n.read ? 'bg-white/5' : 'opacity-60'
                   }`}

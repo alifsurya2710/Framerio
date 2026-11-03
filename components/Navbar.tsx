@@ -61,7 +61,7 @@ export default function Navbar() {
           )}
         </div>
 
-        <Link href="/" aria-label="Framerio - Beranda" className="flex items-center group flex-shrink-0">
+        <Link href="/" aria-label="FramerPhotobooth - Beranda" className="flex items-center group flex-shrink-0">
           <BrandLogo
             width={756}
             height={155}

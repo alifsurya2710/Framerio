@@ -85,7 +85,7 @@ export default function RegisterPage() {
             Pendaftaran Akun
           </h1>
           <p className="text-xs sm:text-sm text-zinc-600 mt-1 font-medium">
-            Dapatkan uji coba gratis 7 hari di Framerio
+            Dapatkan uji coba gratis 7 hari di FramerPhotobooth
           </p>
         </div>
 

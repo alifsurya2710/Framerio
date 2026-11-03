@@ -175,7 +175,7 @@ export default function PaymentClient({ sub }: { sub: any }) {
           <div className="font-mono text-3xl font-black text-zinc-900 tracking-wide mb-1 select-all">
             {number}
           </div>
-          <div className="text-[10px] text-zinc-500 font-semibold">a/n Framerio Studio</div>
+          <div className="text-[10px] text-zinc-500 font-semibold">a/n FramerPhotobooth Studio</div>
 
           {/* Tombol buka aplikasi */}
           <button

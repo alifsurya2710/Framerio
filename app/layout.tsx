@@ -6,7 +6,7 @@ import PwaInstallPrompt from '@/components/PwaInstallPrompt'
 import Mobile3DSplash from '@/components/Mobile3DSplash'
 
 export const metadata: Metadata = {
-  title: 'Framerio — Pocket-Sized Photo Studio & 3D Retro Booth',
+  title: 'FramerPhotobooth — Pocket-Sized Photo Studio & 3D Retro Booth',
   description: 'Studio photobooth online bergaya konsol retro premium. Abadikan momen, cetak photostrip, dan simpan kenangan.',
   manifest: '/manifest.json',
   icons: {
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'Framerio'
+    title: 'FramerPhotobooth'
   }
 }
 

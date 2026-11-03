@@ -80,7 +80,7 @@ export default async function AdminDashboard() {
       <div className="mb-8">
         <div className="text-[10px] font-mono tracking-[0.2em] text-zinc-500 uppercase mb-1">Overview</div>
         <h1 className="text-2xl font-black text-zinc-900 tracking-tight">Dashboard</h1>
-        <p className="text-xs text-zinc-500 mt-0.5">Ringkasan data terbaru platform Framerio.</p>
+        <p className="text-xs text-zinc-500 mt-0.5">Ringkasan data terbaru platform FramerPhotobooth.</p>
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-8">

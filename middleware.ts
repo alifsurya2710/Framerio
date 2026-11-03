@@ -1,10 +1,12 @@
 import { withAuth } from 'next-auth/middleware'
 import { NextResponse } from 'next/server'
+import { AUTH_SECRET } from '@/lib/authSecret'
 
-// SAMA persis dengan lib/auth.ts: middleware (Edge runtime) dan server
-// harus memakai secret yang sama, kalau tidak token sesi tidak bisa
-// didekripsi dan user yang sudah login malah diarahkan ke halaman login.
-const secret = process.env.NEXTAUTH_SECRET || 'framerio-secret-fallback-key-2026'
+// Secret WAJIB sama dengan lib/auth.ts (dijamin lewat lib/authSecret.ts).
+// Middleware (Edge runtime) dan server harus memakai secret identik, kalau
+// tidak token sesi tidak bisa didekripsi dan admin/user yang sudah login
+// malah disuruh login kembali saat membuka Studio.
+const secret = AUTH_SECRET
 
 export default withAuth(
   function middleware(req) {

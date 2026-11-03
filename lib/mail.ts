@@ -23,7 +23,7 @@ export async function sendMail(opts: { to: string; subject: string; html: string
   })
 
   const info = await transporter.sendMail({
-    from: process.env.MAIL_FROM || `"Framerio" <${user}>`,
+    from: process.env.MAIL_FROM || `"FramerPhotobooth" <${user}>`,
     to: opts.to,
     subject: opts.subject,
     html: opts.html,
@@ -51,7 +51,7 @@ export function resetPasswordEmailHtml(link: string, expiresMinutes = 60): strin
       <div style="padding:32px">
         <h2 style="margin:0 0 12px;font-size:18px;color:#1c1c1c">Reset Kata Sandi</h2>
         <p style="margin:0 0 8px;font-size:14px;line-height:1.6;color:#555">
-          Kami menerima permintaan untuk mereset kata sandi akun Framerio Anda.
+          Kami menerima permintaan untuk mereset kata sandi akun FramerPhotobooth Anda.
           Klik tombol di bawah untuk membuat kata sandi baru:
         </p>
         <p style="margin:24px 0;text-align:center">
@@ -71,7 +71,7 @@ export function resetPasswordEmailHtml(link: string, expiresMinutes = 60): strin
         </p>
       </div>
       <div style="background:#f7f6f2;padding:16px 32px;border-top:1px solid #e2e1dc">
-        <span style="font-size:10px;color:#aaa">© ${new Date().getFullYear()} Framerio. All rights reserved.</span>
+        <span style="font-size:10px;color:#aaa">© ${new Date().getFullYear()} FramerPhotobooth. All rights reserved.</span>
       </div>
     </div>
   </div>`

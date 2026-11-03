@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import RetroConsole3D from '@/components/RetroConsole3D'
+import TestimonySection from '@/components/TestimonySection'
 
 interface FeatureDetail {
   id: string
@@ -271,9 +272,14 @@ export default function Home() {
         </div>
       )}
 
+      {/* Bagian testimoni pengunjung (approve admin sebelum tampil) */}
+      <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6">
+        <TestimonySection />
+      </div>
+
       {/* Footer info dengan kontak kerja sama (Gmail & Instagram) */}
       <footer className="mt-6 text-center text-xs text-zinc-600 font-medium flex flex-wrap items-center justify-center gap-x-2 gap-y-1.5">
-        <span>&copy; 2026 Framerio Studio &bull; Pengalaman Photobooth Bergaya Konsol Saku &bull;</span>
+        <span>&copy; 2026 FramerPhotobooth Studio &bull; Pengalaman Photobooth Bergaya Konsol Saku &bull;</span>
         <span>Mau Bekerja Sama? Hubungi:</span>
         <a
           href="mailto:mmochalifsuryaramadhan@gmail.com"
