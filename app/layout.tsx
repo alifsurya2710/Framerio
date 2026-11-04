@@ -4,6 +4,7 @@ import Providers from './providers'
 import Navbar from '@/components/Navbar'
 import PwaInstallPrompt from '@/components/PwaInstallPrompt'
 import Mobile3DSplash from '@/components/Mobile3DSplash'
+import MobileTabBar from '@/components/MobileTabBar'
 
 export const metadata: Metadata = {
   title: 'FramerPhotobooth — Pocket-Sized Photo Studio & 3D Retro Booth',
@@ -36,6 +37,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <Navbar />
             <main className="flex-1 flex flex-col">{children}</main>
             <PwaInstallPrompt />
+            <MobileTabBar />
           </div>
         </Providers>
       </body>
