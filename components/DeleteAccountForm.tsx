@@ -32,7 +32,7 @@ export default function DeleteAccountForm() {
       return
     }
 
-    await signOut({ callbackUrl: '/?deleted=1' })
+    await signOut({ callbackUrl: window.location.origin + '/?deleted=1' })
   }
 
   if (!open) {

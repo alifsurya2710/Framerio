@@ -85,7 +85,7 @@ export default function Navbar() {
                 {session.user?.name || session.user?.email?.split('@')[0]}
               </Link>
               <button
-                onClick={() => signOut({ callbackUrl: '/' })}
+                onClick={() => signOut({ callbackUrl: window.location.origin + '/' })}
                 className="px-4 py-1.5 rounded-full text-xs font-semibold bg-white text-zinc-700 shadow-sm border border-zinc-300 hover:bg-zinc-100 transition"
               >
                 Keluar
@@ -171,7 +171,7 @@ export default function Navbar() {
                   Akun · {session.user?.name || session.user?.email}
                 </Link>
                 <button
-                  onClick={() => signOut({ callbackUrl: '/' })}
+                  onClick={() => signOut({ callbackUrl: window.location.origin + '/' })}
                   className="px-4 py-2 rounded-xl text-xs font-bold bg-white text-zinc-700 shadow-sm border border-zinc-300"
                 >
                   Keluar
