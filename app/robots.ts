@@ -1,6 +1,6 @@
 import type { MetadataRoute } from 'next'
 
-const siteUrl = 'https://frameriophoto.vercel.app'
+const siteUrl = 'https://framerphotobooth.netlify.app'
 
 export default function robots(): MetadataRoute.Robots {
   return {
