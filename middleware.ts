@@ -3,9 +3,6 @@ import { NextResponse } from 'next/server'
 import { AUTH_SECRET } from '@/lib/authSecret'
 
 // Secret WAJIB sama dengan lib/auth.ts (dijamin lewat lib/authSecret.ts).
-// Middleware (Edge runtime) dan server harus memakai secret identik, kalau
-// tidak token sesi tidak bisa didekripsi dan admin/user yang sudah login
-// malah disuruh login kembali saat membuka Studio.
 const secret = AUTH_SECRET
 
 export default withAuth(
@@ -19,7 +16,20 @@ export default withAuth(
   },
   {
     secret,
-    callbacks: { authorized: ({ token }) => !!token },
+    callbacks: {
+      authorized: ({ req, token }) => {
+        // 1. Jika token JWT berhasil didekripsi oleh withAuth
+        if (!!token) return true
+
+        // 2. Fallback untuk browser mobile / PWA / Edge runtime di Netlify:
+        // Kadang di Netlify Edge Functions, dekripsi token otomatis menghasilkan null
+        // padahal cookie sesi sah (secure / normal) tersimpan di browser mobile.
+        const secureCookie = req.cookies.get('__Secure-next-auth.session-token')?.value
+        const regularCookie = req.cookies.get('next-auth.session-token')?.value
+
+        return !!(secureCookie || regularCookie)
+      }
+    },
     pages: { signIn: '/login' }
   }
 )

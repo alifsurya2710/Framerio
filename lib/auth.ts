@@ -6,7 +6,24 @@ import { AUTH_SECRET } from './authSecret'
 
 export const authOptions: NextAuthOptions = {
   secret: AUTH_SECRET,
-  session: { strategy: 'jwt' },
+  session: {
+    strategy: 'jwt',
+    maxAge: 30 * 24 * 60 * 60 // 30 hari (memastikan cookie persisten di mobile browser & PWA)
+  },
+  cookies: {
+    sessionToken: {
+      name:
+        process.env.NODE_ENV === 'production'
+          ? '__Secure-next-auth.session-token'
+          : 'next-auth.session-token',
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        secure: process.env.NODE_ENV === 'production'
+      }
+    }
+  },
   pages: { signIn: '/login' },
   providers: [
     Credentials({

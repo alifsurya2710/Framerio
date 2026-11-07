@@ -2,7 +2,7 @@
 // FramerPhotobooth Service Worker — Auto Update on New Deploy
 // ============================================================
 
-const CACHE_NAME = 'framerphotobooth-v2'
+const CACHE_NAME = 'framerphotobooth-v3'
 
 // File statis yang di-cache (shell app saja)
 const STATIC_ASSETS = [

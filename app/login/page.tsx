@@ -83,7 +83,9 @@ export default function LoginPage() {
       localStorage.removeItem('framerio_login_lockout')
       const session = await getSession()
       const role = (session?.user as any)?.role
-      router.push(role === 'ADMIN' ? '/admin' : '/booth')
+      // Di browser mobile & PWA, reload penuh memastikan cookie sesi HTTPS
+      // langsung terindeks tanpa race-condition dengan middleware / layout Next.js
+      window.location.href = role === 'ADMIN' ? '/admin' : '/booth'
     }
   }
 
