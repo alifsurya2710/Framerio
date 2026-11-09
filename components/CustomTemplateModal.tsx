@@ -15,6 +15,81 @@ const LAYOUT_MAP: Record<number, string> = {
   9: 'grid8', 10: 'grid8'
 }
 
+const SHAPE_OPTIONS = [
+  {
+    id: 'rectangle',
+    label: 'Persegi',
+    preview: (
+      <svg viewBox="0 0 40 40" className="w-8 h-8">
+        <rect x="4" y="4" width="32" height="32" rx="2" fill="currentColor"/>
+      </svg>
+    )
+  },
+  {
+    id: 'rounded',
+    label: 'Bulat Sudut',
+    preview: (
+      <svg viewBox="0 0 40 40" className="w-8 h-8">
+        <rect x="4" y="4" width="32" height="32" rx="12" fill="currentColor"/>
+      </svg>
+    )
+  },
+  {
+    id: 'circle',
+    label: 'Lingkaran',
+    preview: (
+      <svg viewBox="0 0 40 40" className="w-8 h-8">
+        <circle cx="20" cy="20" r="16" fill="currentColor"/>
+      </svg>
+    )
+  },
+  {
+    id: 'heart',
+    label: 'Hati',
+    preview: (
+      <svg viewBox="0 0 40 40" className="w-8 h-8">
+        <path d="M20 34 C20 34 4 24 4 14 C4 9 8 6 12 6 C15.5 6 18 8 20 10.5 C22 8 24.5 6 28 6 C32 6 36 9 36 14 C36 24 20 34 20 34Z" fill="currentColor"/>
+      </svg>
+    )
+  },
+  {
+    id: 'star',
+    label: 'Bintang',
+    preview: (
+      <svg viewBox="0 0 40 40" className="w-8 h-8">
+        <polygon points="20,4 24,15 36,15 26,23 30,35 20,27 10,35 14,23 4,15 16,15" fill="currentColor"/>
+      </svg>
+    )
+  },
+  {
+    id: 'hexagon',
+    label: 'Heksagon',
+    preview: (
+      <svg viewBox="0 0 40 40" className="w-8 h-8">
+        <polygon points="20,4 35,12 35,28 20,36 5,28 5,12" fill="currentColor"/>
+      </svg>
+    )
+  },
+  {
+    id: 'diamond',
+    label: 'Berlian',
+    preview: (
+      <svg viewBox="0 0 40 40" className="w-8 h-8">
+        <polygon points="20,4 36,20 20,36 4,20" fill="currentColor"/>
+      </svg>
+    )
+  },
+  {
+    id: 'triangle',
+    label: 'Segitiga',
+    preview: (
+      <svg viewBox="0 0 40 40" className="w-8 h-8">
+        <polygon points="20,4 36,36 4,36" fill="currentColor"/>
+      </svg>
+    )
+  },
+]
+
 export default function CustomTemplateModal({
   isOpen, onClose, onSuccess, isAdmin
 }: CustomTemplateModalProps) {
@@ -23,6 +98,7 @@ export default function CustomTemplateModal({
   const [bgImage, setBgImage] = useState<string | null>(null)
   const [bgImageName, setBgImageName] = useState<string>('')
   const [isPublic, setIsPublic] = useState(false)
+  const [photoShape, setPhotoShape] = useState<string>('rectangle')
   const [loading, setLoading] = useState(false)
   const [errorMsg, setErrorMsg] = useState('')
 
@@ -66,13 +142,14 @@ export default function CustomTemplateModal({
           frame: '#000000', frameWidth: 0, rounded: 8, gap: 10, pad: 16,
           textColor: '#1c1c1c', labelText: name.trim(),
           subText: 'FRAMERPHOTOBOOTH', filter: 'none', styleType: 'custom',
+          photoShape,
           isPublic: isAdmin ? isPublic : false
         })
       })
       const data = await res.json()
       if (data.success && data.template) {
         onSuccess(data.template)
-        setName(''); setPhotosCount(4); setBgImage(null); setBgImageName(''); setIsPublic(false)
+        setName(''); setPhotosCount(4); setBgImage(null); setBgImageName(''); setIsPublic(false); setPhotoShape('rectangle')
         if (fileInputRef.current) fileInputRef.current.value = ''
         onClose()
       } else {
@@ -88,7 +165,7 @@ export default function CustomTemplateModal({
         <button onClick={onClose} className="absolute top-4 right-4 w-8 h-8 rounded-full bg-zinc-200 hover:bg-zinc-300 flex items-center justify-center text-zinc-700 font-bold">✕</button>
 
         <div className="mb-5">
-          <div className="inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#e85200] text-white mb-2">📁 Upload Template</div>
+          <div className="inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#e85200] text-white mb-2">📷 Upload Template</div>
           <h2 className="text-xl sm:text-2xl font-black tracking-tight">Tambah Template dari Perangkat</h2>
           <p className="text-xs text-zinc-500 mt-0.5">Upload file desain/frame (PNG, JPG, SVG) langsung dari galeri HP atau folder laptop Anda.</p>
         </div>
@@ -104,7 +181,7 @@ export default function CustomTemplateModal({
                   <img src={bgImage} alt="Preview" className="w-full h-full object-cover" />
                   <div className="absolute inset-0 bg-black/20 flex items-end">
                     <div className="w-full p-2 bg-black/40 backdrop-blur-sm">
-                      <p className="text-white text-[10px] font-mono truncate">✓ {bgImageName}</p>
+                      <p className="text-white text-[10px] font-mono truncate">✔ {bgImageName}</p>
                     </div>
                   </div>
                 </div>
@@ -152,6 +229,33 @@ export default function CustomTemplateModal({
               ))}
             </div>
             <p className="text-[10px] text-zinc-400 mt-1.5">Dipilih: <strong className="text-zinc-600">{photosCount} foto</strong></p>
+          </div>
+
+          {/* Bentuk Kolase / Pose */}
+          <div>
+            <label className="block font-bold text-zinc-700 mb-1.5">
+              Bentuk Kolase / Pose
+              <span className="ml-2 text-[10px] font-normal text-zinc-400">(bentuk foto/pose di dalam template)</span>
+            </label>
+            <div className="grid grid-cols-4 gap-2">
+              {SHAPE_OPTIONS.map((shape) => (
+                <button
+                  type="button"
+                  key={shape.id}
+                  onClick={() => setPhotoShape(shape.id)}
+                  className={`flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl font-bold text-[10px] transition-all ${
+                    photoShape === shape.id
+                      ? 'bg-[#e85200] text-white shadow-md ring-2 ring-[#e85200]/30'
+                      : 'bg-white border border-zinc-300 text-zinc-600 hover:bg-orange-50 hover:border-[#e85200]/40'
+                  }`}
+                >
+                  <span className={photoShape === shape.id ? 'text-white' : 'text-zinc-500'}>
+                    {shape.preview}
+                  </span>
+                  {shape.label}
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Admin: Toggle Publikasi */}

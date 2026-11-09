@@ -14,6 +14,81 @@ const LAYOUT_MAP: Record<number, string> = {
   9: 'grid8', 10: 'grid8'
 }
 
+const SHAPE_OPTIONS = [
+  {
+    id: 'rectangle',
+    label: 'Persegi',
+    preview: (
+      <svg viewBox="0 0 40 40" className="w-8 h-8">
+        <rect x="4" y="4" width="32" height="32" rx="2" fill="currentColor"/>
+      </svg>
+    )
+  },
+  {
+    id: 'rounded',
+    label: 'Bulat Sudut',
+    preview: (
+      <svg viewBox="0 0 40 40" className="w-8 h-8">
+        <rect x="4" y="4" width="32" height="32" rx="12" fill="currentColor"/>
+      </svg>
+    )
+  },
+  {
+    id: 'circle',
+    label: 'Lingkaran',
+    preview: (
+      <svg viewBox="0 0 40 40" className="w-8 h-8">
+        <circle cx="20" cy="20" r="16" fill="currentColor"/>
+      </svg>
+    )
+  },
+  {
+    id: 'heart',
+    label: 'Hati',
+    preview: (
+      <svg viewBox="0 0 40 40" className="w-8 h-8">
+        <path d="M20 34 C20 34 4 24 4 14 C4 9 8 6 12 6 C15.5 6 18 8 20 10.5 C22 8 24.5 6 28 6 C32 6 36 9 36 14 C36 24 20 34 20 34Z" fill="currentColor"/>
+      </svg>
+    )
+  },
+  {
+    id: 'star',
+    label: 'Bintang',
+    preview: (
+      <svg viewBox="0 0 40 40" className="w-8 h-8">
+        <polygon points="20,4 24,15 36,15 26,23 30,35 20,27 10,35 14,23 4,15 16,15" fill="currentColor"/>
+      </svg>
+    )
+  },
+  {
+    id: 'hexagon',
+    label: 'Heksagon',
+    preview: (
+      <svg viewBox="0 0 40 40" className="w-8 h-8">
+        <polygon points="20,4 35,12 35,28 20,36 5,28 5,12" fill="currentColor"/>
+      </svg>
+    )
+  },
+  {
+    id: 'diamond',
+    label: 'Berlian',
+    preview: (
+      <svg viewBox="0 0 40 40" className="w-8 h-8">
+        <polygon points="20,4 36,20 20,36 4,20" fill="currentColor"/>
+      </svg>
+    )
+  },
+  {
+    id: 'triangle',
+    label: 'Segitiga',
+    preview: (
+      <svg viewBox="0 0 40 40" className="w-8 h-8">
+        <polygon points="20,4 36,36 4,36" fill="currentColor"/>
+      </svg>
+    )
+  },
+]
+
 export default function AdminCreateTemplateModal({
   isOpen, onClose, onSuccess
 }: AdminCreateTemplateModalProps) {
@@ -22,6 +97,7 @@ export default function AdminCreateTemplateModal({
   const [bgImage, setBgImage] = useState<string | null>(null)
   const [bgImageName, setBgImageName] = useState<string>('')
   const [isPublic, setIsPublic] = useState(true)
+  const [photoShape, setPhotoShape] = useState<string>('rectangle')
   const [loading, setLoading] = useState(false)
   const [errorMsg, setErrorMsg] = useState('')
 
@@ -53,6 +129,7 @@ export default function AdminCreateTemplateModal({
     setBgImage(null)
     setBgImageName('')
     setIsPublic(true)
+    setPhotoShape('rectangle')
     setErrorMsg('')
     if (fileInputRef.current) fileInputRef.current.value = ''
   }
@@ -87,6 +164,7 @@ export default function AdminCreateTemplateModal({
           subText: 'FRAMERPHOTOBOOTH',
           filter: 'none',
           styleType: 'custom',
+          photoShape,
           isPublic
         })
       })
@@ -143,54 +221,33 @@ export default function AdminCreateTemplateModal({
             <label className="block font-bold text-zinc-700 mb-1.5">
               Gambar Template <span className="text-red-500">*</span>
             </label>
-            <div className="bg-white rounded-2xl border-2 border-dashed border-[#e85200]/40 hover:border-[#e85200] transition-colors">
+            <div className="bg-white rounded-2xl border-2 border-dashed border-[#e85200]/50 hover:border-[#e85200] transition-colors p-4">
               {bgImage ? (
-                <div className="p-4 space-y-3">
-                  <div className="flex gap-4 items-start">
-                    <div
-                      className="flex-shrink-0 w-28 rounded-xl overflow-hidden border border-zinc-200 shadow-sm"
-                      style={{ aspectRatio: '9/16' }}
-                    >
-                      <img src={bgImage} alt="Preview" className="w-full h-full object-cover" />
-                    </div>
-                    <div className="flex-1 space-y-2 pt-1">
-                      <span className="text-emerald-600 font-bold text-xs">✓ Gambar dipilih</span>
-                      <p className="font-mono text-[10px] text-zinc-500 truncate">{bgImageName}</p>
-                      <button
-                        type="button"
-                        onClick={handleRemoveImage}
-                        className="text-[10px] font-bold text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 px-3 py-1.5 rounded-lg transition"
-                      >
-                        🗑 Ganti Gambar
-                      </button>
+                <div className="space-y-3">
+                  <div className="relative rounded-xl overflow-hidden border border-zinc-200" style={{ aspectRatio: '9/16', maxHeight: 280 }}>
+                    <img src={bgImage} alt="Preview" className="w-full h-full object-cover" />
+                    <div className="absolute inset-0 bg-black/20 flex items-end">
+                      <div className="w-full p-2 bg-black/40 backdrop-blur-sm">
+                        <p className="text-white text-[10px] font-mono truncate">✔ {bgImageName}</p>
+                      </div>
                     </div>
                   </div>
+                  <button type="button" onClick={handleRemoveImage} className="w-full py-2 rounded-xl text-xs font-bold text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 transition">
+                    🗑 Ganti / Hapus Gambar
+                  </button>
                 </div>
               ) : (
-                <label
-                  htmlFor="admin-template-upload"
-                  className="flex flex-col items-center justify-center gap-3 py-10 cursor-pointer"
-                >
-                  <div className="w-14 h-14 rounded-2xl bg-orange-50 border-2 border-dashed border-[#e85200]/60 flex items-center justify-center text-2xl">
-                    📤
-                  </div>
+                <label htmlFor="admin-template-file-upload" className="flex flex-col items-center justify-center gap-3 py-10 cursor-pointer">
+                  <div className="w-16 h-16 rounded-2xl bg-orange-50 border-2 border-dashed border-[#e85200]/60 flex items-center justify-center text-3xl">📤</div>
                   <div className="text-center">
-                    <p className="font-black text-zinc-800 text-sm">Upload Gambar Template</p>
+                    <p className="font-black text-zinc-800 text-sm">Pilih Gambar dari Perangkat</p>
                     <p className="text-zinc-500 text-[10px] mt-1">PNG, JPG, SVG — Maks. 8MB</p>
+                    <p className="text-zinc-400 text-[10px]">Galeri HP / Folder Laptop</p>
                   </div>
-                  <span className="px-5 py-2 rounded-xl bg-[#e85200] text-white font-bold text-xs hover:bg-[#ff5d07] transition">
-                    Pilih dari Perangkat
-                  </span>
+                  <span className="px-5 py-2 rounded-xl bg-[#e85200] text-white font-bold text-xs hover:bg-[#ff5d07] transition">Buka Galeri</span>
                 </label>
               )}
-              <input
-                ref={fileInputRef}
-                id="admin-template-upload"
-                type="file"
-                accept="image/*"
-                onChange={handleImageUpload}
-                className="hidden"
-              />
+              <input ref={fileInputRef} id="admin-template-file-upload" type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
             </div>
           </div>
 
@@ -237,6 +294,33 @@ export default function AdminCreateTemplateModal({
               Dipilih: <strong className="text-zinc-600">{photosCount} foto</strong>
               {' → '}Layout: <span className="font-mono text-zinc-500">{LAYOUT_MAP[photosCount]}</span>
             </p>
+          </div>
+
+          {/* Bentuk Kolase / Pose */}
+          <div>
+            <label className="block font-bold text-zinc-700 mb-1.5">
+              Bentuk Kolase / Pose
+              <span className="ml-2 text-[10px] font-normal text-zinc-400">(bentuk foto/pose di dalam template)</span>
+            </label>
+            <div className="grid grid-cols-4 gap-2">
+              {SHAPE_OPTIONS.map((shape) => (
+                <button
+                  type="button"
+                  key={shape.id}
+                  onClick={() => setPhotoShape(shape.id)}
+                  className={`flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl font-bold text-[10px] transition-all ${
+                    photoShape === shape.id
+                      ? 'bg-[#e85200] text-white shadow-md ring-2 ring-[#e85200]/30'
+                      : 'bg-white border border-zinc-300 text-zinc-600 hover:bg-orange-50 hover:border-[#e85200]/40'
+                  }`}
+                >
+                  <span className={photoShape === shape.id ? 'text-white' : 'text-zinc-500'}>
+                    {shape.preview}
+                  </span>
+                  {shape.label}
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Publikasi Toggle */}

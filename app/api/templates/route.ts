@@ -94,6 +94,7 @@ export async function POST(req: Request) {
       filter = 'none',
       styleType = 'custom',
       bgImage = null,
+      photoShape = 'rectangle',
       isPublic = false // jika admin bisa set publik langsung
     } = body
 
@@ -122,6 +123,7 @@ export async function POST(req: Request) {
         filter,
         styleType,
         bgImage: bgImage ? String(bgImage) : null,
+        photoShape: photoShape || 'rectangle',
         isPublic: isAdmin ? Boolean(isPublic) : false // non-admin default private untuk akunnya
       }
     })

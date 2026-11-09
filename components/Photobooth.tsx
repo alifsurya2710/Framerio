@@ -56,6 +56,7 @@ export type Template = {
   bgImage?: string | null
   isCustom?: boolean
   isPublic?: boolean
+  photoShape?: string  // 'rectangle' | 'rounded' | 'circle' | 'heart' | 'star' | 'hexagon' | 'diamond'
 }
 
 type LayoutDef = { id: Layout; name: string; count: number }
@@ -412,6 +413,100 @@ function drawCover(
     sy = (img.naturalHeight - sh) / 2
   }
   ctx.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh)
+}
+
+function drawShapePath(
+  ctx: CanvasRenderingContext2D,
+  shape: string,
+  px: number,
+  py: number,
+  w: number,
+  h: number,
+  radius: number = 8
+) {
+  ctx.beginPath()
+  switch (shape) {
+    case 'circle': {
+      const cx = px + w / 2
+      const cy = py + h / 2
+      const r = Math.min(w, h) / 2
+      ctx.arc(cx, cy, r, 0, Math.PI * 2)
+      break
+    }
+    case 'heart': {
+      const topCurveHeight = h * 0.3
+      ctx.moveTo(px + w / 2, py + h * 0.28)
+      ctx.bezierCurveTo(px + w / 2, py, px, py, px, py + topCurveHeight)
+      ctx.bezierCurveTo(px, py + (h + topCurveHeight) / 2, px + w / 2, py + (h + topCurveHeight) / 1.4, px + w / 2, py + h)
+      ctx.bezierCurveTo(px + w / 2, py + (h + topCurveHeight) / 1.4, px + w, py + (h + topCurveHeight) / 2, px + w, py + topCurveHeight)
+      ctx.bezierCurveTo(px + w, py, px + w / 2, py, px + w / 2, py + h * 0.28)
+      ctx.closePath()
+      break
+    }
+    case 'star': {
+      const cx = px + w / 2
+      const cy = py + h / 2
+      const outerR = Math.min(w, h) / 2
+      const innerR = outerR * 0.45
+      const spikes = 5
+      let rot = (Math.PI / 2) * 3
+      const step = Math.PI / spikes
+      ctx.moveTo(cx, cy - outerR)
+      for (let i = 0; i < spikes; i++) {
+        let x = cx + Math.cos(rot) * outerR
+        let y = cy + Math.sin(rot) * outerR
+        ctx.lineTo(x, y)
+        rot += step
+
+        x = cx + Math.cos(rot) * innerR
+        y = cy + Math.sin(rot) * innerR
+        ctx.lineTo(x, y)
+        rot += step
+      }
+      ctx.lineTo(cx, cy - outerR)
+      ctx.closePath()
+      break
+    }
+    case 'hexagon': {
+      const cx = px + w / 2
+      const cy = py + h / 2
+      const rx = w / 2
+      const ry = h / 2
+      for (let i = 0; i < 6; i++) {
+        const angle = (Math.PI / 3) * i - Math.PI / 6
+        const x = cx + rx * Math.cos(angle)
+        const y = cy + ry * Math.sin(angle)
+        if (i === 0) ctx.moveTo(x, y)
+        else ctx.lineTo(x, y)
+      }
+      ctx.closePath()
+      break
+    }
+    case 'diamond': {
+      ctx.moveTo(px + w / 2, py)
+      ctx.lineTo(px + w, py + h / 2)
+      ctx.lineTo(px + w / 2, py + h)
+      ctx.lineTo(px, py + h / 2)
+      ctx.closePath()
+      break
+    }
+    case 'triangle': {
+      ctx.moveTo(px + w / 2, py)
+      ctx.lineTo(px + w, py + h)
+      ctx.lineTo(px, py + h)
+      ctx.closePath()
+      break
+    }
+    case 'rounded': {
+      ctx.roundRect(px, py, w, h, Math.max(radius, Math.min(w, h) * 0.25))
+      break
+    }
+    case 'rectangle':
+    default: {
+      ctx.roundRect(px, py, w, h, radius)
+      break
+    }
+  }
 }
 
 async function composeLayout(
@@ -878,6 +973,7 @@ async function composeLayout(
     const gapSize = Math.max(tpl.gap || 24, 24) * S
     const radius = (tpl.rounded || 12) * S
     const frameW = (tpl.frameWidth && tpl.frameWidth > 0 ? tpl.frameWidth : 0) * S
+    const shape = tpl.photoShape || 'rectangle'
 
     if (count > 4) {
       const cols = 2
@@ -891,8 +987,7 @@ async function composeLayout(
         const py = margin + row * (cellH + gapSize)
 
         ctx.save()
-        ctx.beginPath()
-        ctx.roundRect(px, py, cellW, cellH, radius)
+        drawShapePath(ctx, shape, px, py, cellW, cellH, radius)
         ctx.clip()
         drawCover(ctx, img, px, py, cellW, cellH)
         ctx.restore()
@@ -900,8 +995,7 @@ async function composeLayout(
         if (frameW > 0) {
           ctx.strokeStyle = tpl.frame || '#000'
           ctx.lineWidth = frameW
-          ctx.beginPath()
-          ctx.roundRect(px, py, cellW, cellH, radius)
+          drawShapePath(ctx, shape, px, py, cellW, cellH, radius)
           ctx.stroke()
         }
       })
@@ -913,8 +1007,7 @@ async function composeLayout(
         const py = margin + i * (cellH + gapSize)
 
         ctx.save()
-        ctx.beginPath()
-        ctx.roundRect(margin, py, cellW, cellH, radius)
+        drawShapePath(ctx, shape, margin, py, cellW, cellH, radius)
         ctx.clip()
         drawCover(ctx, img, margin, py, cellW, cellH)
         ctx.restore()
@@ -922,8 +1015,7 @@ async function composeLayout(
         if (frameW > 0) {
           ctx.strokeStyle = tpl.frame || '#000'
           ctx.lineWidth = frameW
-          ctx.beginPath()
-          ctx.roundRect(margin, py, cellW, cellH, radius)
+          drawShapePath(ctx, shape, margin, py, cellW, cellH, radius)
           ctx.stroke()
         }
       })
@@ -1127,6 +1219,30 @@ function CollagePreview({ shots, tpl, size = 'md' }: {
   // ── Pratinjau CUSTOM / DYNAMIC TEMPLATE ──
   if (tpl.styleType === 'custom' || tpl.isCustom) {
     const count = tpl.photosCount || 4
+    const shape = tpl.photoShape || 'rectangle'
+
+    const getClipPath = (s: string) => {
+      switch (s) {
+        case 'circle':
+          return 'circle(50% at 50% 50%)'
+        case 'heart':
+          return 'path("M 50,85 C 50,85 10,60 10,35 C 10,22 20,15 30,15 C 38.7,15 46.2,20 50,26.2 C 53.8,20 61.3,15 70,15 C 80,15 90,22 90,35 C 90,60 50,85 50,85 Z")'
+        case 'star':
+          return 'polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)'
+        case 'hexagon':
+          return 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)'
+        case 'diamond':
+          return 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)'
+        case 'triangle':
+          return 'polygon(50% 0%, 100% 100%, 0% 100%)'
+        default:
+          return 'none'
+      }
+    }
+
+    const clipStyle = getClipPath(shape)
+    const isSpecialClip = clipStyle !== 'none'
+
     return (
       <div
         className="w-full rounded-2xl p-2 flex flex-col gap-1 shadow-sm border relative overflow-hidden bg-cover bg-center"
@@ -1147,9 +1263,10 @@ function CollagePreview({ shots, tpl, size = 'md' }: {
               key={i}
               className="aspect-[4/3] bg-zinc-200/90 overflow-hidden shadow-sm"
               style={{
-                borderRadius: `${Math.min(tpl.rounded || 6, 12)}px`,
+                borderRadius: isSpecialClip ? undefined : `${Math.min(tpl.rounded || 6, 12)}px`,
                 borderColor: tpl.frame || 'transparent',
-                borderWidth: tpl.frameWidth ? '1px' : '0'
+                borderWidth: tpl.frameWidth && !isSpecialClip ? '1px' : '0',
+                clipPath: isSpecialClip ? clipStyle : undefined
               }}
             >
               {imgs[i] ? <img src={imgs[i]} className="w-full h-full object-cover" /> : null}
@@ -1193,6 +1310,7 @@ export default function Photobooth({ allowed }: { allowed: boolean }) {
   const streamRef  = useRef<MediaStream | null>(null)
 
   const [facing,    setFacing]    = useState<'user' | 'environment'>('user')
+  const [isMirrored, setIsMirrored] = useState<boolean>(true)
   const [ready,     setReady]     = useState(false)
   const [template,  setTemplate]  = useState<Template>(TEMPLATES[0]) // Snoopy default
   const [layout,    setLayout]    = useState<Layout | string>(TEMPLATES[0].recommendedLayout)
@@ -1261,6 +1379,7 @@ export default function Photobooth({ allowed }: { allowed: boolean }) {
             filter: t.filter,
             styleType: 'custom',
             bgImage: t.bgImage,
+            photoShape: t.photoShape || 'rectangle',
             isCustom: true,
             isPublic: t.isPublic
           }))
@@ -1314,6 +1433,7 @@ export default function Photobooth({ allowed }: { allowed: boolean }) {
       filter: newTpl.filter,
       styleType: 'custom',
       bgImage: newTpl.bgImage,
+      photoShape: newTpl.photoShape || 'rectangle',
       isCustom: true,
       isPublic: newTpl.isPublic
     }
@@ -1351,7 +1471,7 @@ export default function Photobooth({ allowed }: { allowed: boolean }) {
     canvas.width = video.videoWidth || 1280
     canvas.height = video.videoHeight || 720
     const ctx = canvas.getContext('2d')!
-    if (facing === 'user') {
+    if (isMirrored) {
       ctx.translate(canvas.width, 0)
       ctx.scale(-1, 1)
     }
@@ -1473,7 +1593,44 @@ export default function Photobooth({ allowed }: { allowed: boolean }) {
 
               {/* Viewfinder Video */}
               <div className="relative rounded-xl overflow-hidden bg-zinc-900" style={{ aspectRatio: '4/3' }}>
-                <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
+                <video
+                  ref={videoRef}
+                  autoPlay
+                  playsInline
+                  muted
+                  className={`w-full h-full object-cover transition-transform duration-300 ${
+                    isMirrored ? 'scale-x-[-1]' : 'scale-x-100'
+                  }`}
+                />
+
+                {/* Floating Mirror / Cermin Button di atas kamera (sesuai gambar) */}
+                <button
+                  type="button"
+                  onClick={() => setIsMirrored(m => !m)}
+                  title={isMirrored ? 'Cermin Aktif (Klik untuk matikan)' : 'Cermin Nonaktif (Klik untuk aktifkan)'}
+                  className={`absolute top-3 right-3 z-10 w-10 h-10 rounded-full flex items-center justify-center backdrop-blur-md border transition-all duration-200 active:scale-95 shadow-md ${
+                    isMirrored
+                      ? 'bg-white/85 text-zinc-900 border-white/80 shadow-[0_2px_10px_rgba(0,0,0,0.15)]'
+                      : 'bg-zinc-900/60 text-white/70 border-white/20 hover:bg-zinc-900/80 hover:text-white'
+                  }`}
+                >
+                  <svg viewBox="0 0 24 24" className="w-5 h-5 fill-current">
+                    {/* Garis pemisah tengah vertikal */}
+                    <rect x="11" y="3" width="2" height="18" rx="1" />
+                    {/* Kiri: Trapesium bergaris / outline */}
+                    <path
+                      d="M9 6L4 8.2v7.6L9 18V6z"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.8"
+                      strokeLinejoin="round"
+                    />
+                    {/* Kanan: Trapesium solid terisi warna */}
+                    <path
+                      d="M15 6l5 2.2v7.6L15 18V6z"
+                    />
+                  </svg>
+                </button>
                 {countdown !== null && (
                   <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-900/70 backdrop-blur-sm">
                     <span className="text-white font-black tabular-nums drop-shadow-2xl" style={{ fontSize: 'clamp(4rem,18vw,8rem)' }}>
@@ -1547,11 +1704,41 @@ export default function Photobooth({ allowed }: { allowed: boolean }) {
               {/* Controls */}
               <div className="flex gap-2 mt-2.5 items-center">
                 <button
-                  onClick={() => setFacing(f => f === 'user' ? 'environment' : 'user')}
-                  className="px-4 py-2.5 rounded-full text-xs font-bold bg-white/70 hover:bg-white border border-zinc-300 text-zinc-700 transition flex-shrink-0"
+                  type="button"
+                  onClick={() => {
+                    setFacing(f => {
+                      const next = f === 'user' ? 'environment' : 'user'
+                      setIsMirrored(next === 'user')
+                      return next
+                    })
+                  }}
+                  className="px-3.5 py-2.5 rounded-full text-xs font-bold bg-white/70 hover:bg-white border border-zinc-300 text-zinc-700 transition flex-shrink-0 flex items-center gap-1.5"
                 >
-                  ↺ Balik Kamera
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5">
+                    <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
+                  </svg>
+                  <span>Balik Kamera</span>
                 </button>
+
+                {/* Tombol Balik / Mirror Tambahan di Bar Kontrol */}
+                <button
+                  type="button"
+                  onClick={() => setIsMirrored(m => !m)}
+                  className={`px-3 py-2.5 rounded-full text-xs font-bold border transition flex-shrink-0 flex items-center gap-1.5 ${
+                    isMirrored
+                      ? 'bg-zinc-900 text-white border-zinc-900 shadow-sm'
+                      : 'bg-white/70 hover:bg-white text-zinc-700 border-zinc-300'
+                  }`}
+                  title="Balik arah foto (Mirror)"
+                >
+                  <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current">
+                    <rect x="11" y="3" width="2" height="18" rx="1" />
+                    <path d="M9 6L4 8.2v7.6L9 18V6z" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+                    <path d="M15 6l5 2.2v7.6L15 18V6z" />
+                  </svg>
+                  <span className="hidden sm:inline">{isMirrored ? 'Cermin Aktif' : 'Cermin Nonaktif'}</span>
+                </button>
+
                 <button
                   onClick={runCapture}
                   disabled={capturing || !ready}

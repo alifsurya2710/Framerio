@@ -68,6 +68,7 @@ async function createTemplate(userId: string, body: any, isAdmin: boolean) {
     filter = 'none',
     styleType = 'custom',
     bgImage = null,
+    photoShape = 'rectangle',
     isPublic = true
   } = body
 
@@ -96,6 +97,7 @@ async function createTemplate(userId: string, body: any, isAdmin: boolean) {
       filter,
       styleType,
       bgImage: bgImage ? String(bgImage) : null,
+      photoShape: photoShape || 'rectangle',
       isPublic: Boolean(isPublic)
     }
   })

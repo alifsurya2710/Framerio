@@ -90,6 +90,7 @@ model CustomTemplate {
   filter            String   @default("none")
   styleType         String   @default("custom")
   bgImage           String?  @db.Text
+  photoShape        String   @default("rectangle")
   isPublic          Boolean  @default(false)
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
